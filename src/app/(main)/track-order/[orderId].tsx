@@ -1,0 +1,1 @@
+import { View, Text } from 'react-native'; export default function TrackOrderScreen() { return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Track Order Screen</Text></View>; }
