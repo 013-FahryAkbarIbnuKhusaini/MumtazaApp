@@ -11,10 +11,18 @@ interface ChipProps {
 export const Chip = ({ label, selected, onPress, className = '' }: ChipProps) => {
   return (
     <TouchableOpacity
-      className={`px-4 py-2 rounded-full border ${selected ? 'bg-white border-primary' : 'bg-surface border-transparent'} ${className}`}
+      className={`px-4 py-2 rounded-full ${
+        selected
+          ? 'bg-white border-[1.5px] border-[#C9A961]'
+          : 'bg-[#F1EDE7] border border-transparent'
+      } ${className}`}
       onPress={onPress}
     >
-      <Text className={`font-bodyMedium text-sm ${selected ? 'text-primary' : 'text-textPrimary'}`}>
+      <Text
+        className={`text-sm ${
+          selected ? 'font-semibold text-[#C9A961]' : 'font-medium text-[#211D18]'
+        }`}
+      >
         {label}
       </Text>
     </TouchableOpacity>

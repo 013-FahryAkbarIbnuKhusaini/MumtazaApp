@@ -6,11 +6,13 @@ import {
   ImageBackground,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu } from 'lucide-react-native';
 import { Badge } from '../../components/ui/Badge';
+import { Chip } from '../../components/ui/Chip';
 
 // Color tokens are centralized in src/constants/theme.ts and consumed via
 // NativeWind utility classes (bg-primary, text-textPrimary, bg-surface, etc.).
@@ -110,34 +112,52 @@ const HomeHeader: React.FC = () => {
 
 const SearchBar: React.FC = () => {
   return (
-    <View className="mx-5 my-3 flex-row items-center bg-surface rounded-2xl px-4 py-3">
-      <Search size={20} color={ICON.textSecondary} />
-      {/* Presentational only. Swap this row for <TextInput> (see src/components/ui/TextInput)
-          when wiring live search — keep the same wrapper styling. */}
-      <Text className="ml-2 font-body text-textSecondary text-sm">Cari perhiasan emas...</Text>
+    <View className="mt-6 mb-8 mx-5">
+      <View className="flex-row items-center bg-[#F1EDE7] rounded-full px-4 py-3.5 border border-[#E8E3DB]">
+        <View className="mr-2">
+          <Search size={18} color="#7A756D" />
+        </View>
+        {/* TODO: wire up search state/navigation */}
+        <TextInput
+          placeholder="Search collections, rings, necklaces..."
+          placeholderTextColor="#7A756D"
+          editable={true}
+          className="flex-1 text-sm text-[#211D18]"
+        />
+      </View>
     </View>
   );
 };
 
 const HeroBanner: React.FC = () => {
   return (
-    <View className="mx-5 my-3">
+    <View className="mx-5 rounded-2xl overflow-hidden">
       <ImageBackground
-        source={{ uri: 'https://picsum.photos/seed/hero-gold/1200/700' }}
-        className="h-52 rounded-3xl overflow-hidden"
+        source={{ uri: 'https://images.unsplash.com/photo-1638617501607-5dfb8b079ebf?q=80&w=1200&auto=format&fit=crop' }}
         resizeMode="cover"
+        className="h-52"
       >
-        <View className="absolute inset-0 bg-black/35" />
+        <View className="absolute inset-0 bg-black/40" />
+
         <View className="flex-1 justify-end p-5">
-          <Text className="font-headingSemiBold text-white text-2xl">Elegance Redefined in Gold</Text>
-          <Text className="font-body text-white/85 text-sm mt-1">
-            Discover handcrafted 22K heirlooms.
-          </Text>
-          <TouchableOpacity
-            className="mt-3 self-start bg-primary rounded-full px-5 py-2.5"
-            onPress={() => {}}
+          <View className="self-start flex-row items-center px-3 py-1 rounded-full border border-white/40 bg-white/10 mb-3">
+            <Text className="text-[10px] font-semibold uppercase tracking-widest text-white">
+              THE HERITAGE COLLECTION
+            </Text>
+          </View>
+
+          <Text
+            className="text-3xl font-bold text-white leading-tight mb-4"
+            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
           >
-            <Text className="font-bodySemiBold text-white text-sm">Shop Now</Text>
+            {'Elegance Redefined\nin Gold'}
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => {}} // TODO: wire up collection navigation
+            className="self-start bg-[#785928] rounded-full px-5 py-2.5"
+          >
+            <Text className="text-white font-semibold text-sm">Explore Collection</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -157,35 +177,25 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
   onSelect,
 }) => {
   return (
-    <View className="my-3">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="px-5"
-      >
-        {categories.map((category) => {
-          const active = category === activeCategory;
-          return (
-            <TouchableOpacity
+    <View className="mt-6">
+      <Text className="font-headingSemiBold text-textPrimary text-lg px-5">Categories</Text>
+      <View className="mt-3">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="px-5"
+        >
+          {categories.map((category) => (
+            <Chip
               key={category}
-              className={`mr-3 px-4 py-2 rounded-full border ${
-                active
-                  ? 'bg-primary border-primary'
-                  : 'bg-surface border-border'
-              }`}
+              label={category}
+              selected={category === activeCategory}
               onPress={() => onSelect?.(category)}
-            >
-              <Text
-                className={`font-bodyMedium text-sm ${
-                  active ? 'text-white' : 'text-textPrimary'
-                }`}
-              >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+              className="mr-3"
+            />
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 };
