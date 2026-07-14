@@ -8,9 +8,10 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu } from 'lucide-react-native';
+import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu, ArrowRight } from 'lucide-react-native';
 import { Badge } from '../../components/ui/Badge';
 import { Chip } from '../../components/ui/Chip';
 
@@ -41,7 +42,7 @@ const PRODUCTS: Product[] = [
     title: 'Surya Radiance Ring',
     subtitle: '22K Gold • Handcrafted',
     price: 'Rp 12.5M',
-    image: 'https://picsum.photos/seed/surya-ring/800/800',
+    image: 'https://images.unsplash.com/photo-1605100804763-247f6612d48e?q=80&w=800',
     badge: 'BEST SELLER',
     size: 'large',
   },
@@ -50,7 +51,7 @@ const PRODUCTS: Product[] = [
     title: 'Minimalist Drop',
     subtitle: '18K Gold Earrings',
     price: 'Rp 4.2M',
-    image: 'https://picsum.photos/seed/minimalist-drop/600/600',
+    image: 'https://images.unsplash.com/photo-1599643478524-fb66f70362fec?q=80&w=600',
     size: 'small',
   },
   {
@@ -58,13 +59,13 @@ const PRODUCTS: Product[] = [
     title: 'MUMTAZA 10g Bar',
     subtitle: '99.99% Fine Gold',
     price: 'Rp 11.8M',
-    image: 'https://picsum.photos/seed/mumtaza-bar/600/600',
+    image: 'https://images.unsplash.com/photo-1610375461246-83ff852e5b84?q=80&w=600',
     badge: 'INVESTMENT',
     size: 'small',
   },
 ];
 
-const CATEGORIES: string[] = ['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Gold Bars'];
+const CATEGORIES: string[] = ['Cincin', 'Kalung', 'Gelang', 'Anting', 'Liontin', 'Logam Mulia'];
 
 const HomeHeader: React.FC = () => {
   return (
@@ -226,26 +227,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onPress={onPress}
       activeOpacity={0.95}
     >
-      <View className={`${imageHeight} w-full relative bg-surfaceAlt`}>
+      <View className="relative bg-[#F8F6F2] rounded-2xl overflow-hidden">
         <Image source={{ uri: product.image }} className="w-full h-full" resizeMode="cover" />
         {product.badge && (
-          <View className="absolute top-3 left-3">
-            <Badge label={product.badge} variant={badgeVariant} className={badgeClassName} />
+          <View className="absolute top-3 left-3 px-2 py-1 rounded-full ${product.badge === 'BEST SELLER' ? 'bg-[#785928]' : 'bg-white border border-gray-200'}">
+            <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>
           </View>
         )}
-        <TouchableOpacity
-          className="absolute top-3 right-3 p-1.5 bg-white/90 rounded-full"
-          onPress={onToggleFavorite}
-        >
-          <Heart size={20} color={ICON.textPrimary} />
-        </TouchableOpacity>
+        <Pressable className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm" onPress={onToggleFavorite}>
+          <Heart size={16} color="#785928" fill={product.badge === 'BEST SELLER' ? '#785928' : 'transparent'} />
+        </Pressable>
       </View>
       <View className="p-3">
-        <Text className="font-headingSemiBold text-textPrimary text-base" numberOfLines={1}>
-          {product.title}
-        </Text>
-        <Text className="font-body text-textSecondary text-xs mt-1">{product.subtitle}</Text>
-        <Text className="font-headingSemiBold text-primary text-base mt-2">{product.price}</Text>
+        {product.size === 'large' ? (
+          <View className="flex-row justify-between items-start mt-3">
+            <View>
+              <Text className="text-base font-bold text-textPrimary">{product.title}</Text>
+              <Text className="text-sm text-textSecondary mt-1">{product.subtitle}</Text>
+            </View>
+            <Text className="text-base font-bold text-[#785928]">{product.price}</Text>
+          </View>
+        ) : (
+          <View className="flex-col mt-3">
+            <Text className="text-sm font-bold text-textPrimary" numberOfLines={1}>{product.title}</Text>
+            <Text className="text-sm font-bold text-[#785928] mt-1">{product.price}</Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -257,12 +264,12 @@ const FeaturedProductsSection: React.FC = () => {
 
   return (
     <View className="my-3 px-5">
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="font-headingSemiBold text-textPrimary text-lg">Featured Products</Text>
-        <TouchableOpacity className="flex-row items-center" onPress={() => {}}>
-          <Text className="font-bodyMedium text-primary text-sm mr-1">See All</Text>
-          <ChevronRight size={16} color={ICON.gold} />
-        </TouchableOpacity>
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-xl font-bold text-black">Featured</Text>
+        <Pressable className="flex-row items-center gap-1" onPress={() => {}}>
+          <Text className="text-sm font-medium text-[#785928]">View All</Text>
+          <ArrowRight size={16} color="#785928" />
+        </Pressable>
       </View>
 
       {largeProduct && <ProductCard product={largeProduct} onPress={() => {}} onToggleFavorite={() => {}} />}
