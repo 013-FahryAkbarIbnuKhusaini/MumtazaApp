@@ -1,0 +1,17 @@
+1. Cara Ngambil Kode (Pull)
+Ini buat narik update terbaru dari GitHub ke laptop lu biar kodingannya sinkron:
+
+Bash
+git pull origin main
+(Kalau nama branch lu bukan main, ganti main dengan nama branch yang aktif di pojok kiri bawah).
+
+2. Cara Ngirim Kode (Push)
+Ini buat ngirim hasil kerjaan lu dari laptop ke GitHub. Lakukan urutan ini:
+
+Pilih file: git add .
+
+Kasih catatan: git commit -m "tulis pesan di sini"
+
+Kirim: git push origin main
+
+(Pastikan semua file sudah di-Save/Ctrl+S sebelum git add biar nggak ada perubahan yang ketinggalan).
