@@ -1,15 +1,14 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { Animated, Pressable, ColorValue } from 'react-native';
-import { Home, TrendingUp, ShoppingBag, User } from 'lucide-react-native';
-import { useRef } from 'react';
+import { Animated, ColorValue } from 'react-native';
+import { Home, LineChart, ShoppingBag, User } from 'lucide-react-native';
 
 function AnimatedTabIcon({ IconComponent, focused, color, size }: { IconComponent: React.ElementType; focused: boolean; color: string | ColorValue; size: number }) {
-  const scale = useRef(new Animated.Value(focused ? 1.15 : 1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     Animated.spring(scale, {
-      toValue: focused ? 1.15 : 1,
+      toValue: focused ? 1.2 : 1,
       friction: 6,
       tension: 80,
       useNativeDriver: true,
@@ -46,6 +45,7 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: '500',
         },
+
       }}
     >
       <Tabs.Screen
@@ -56,10 +56,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="price"
+        name="gold-price"
         options={{
           title: 'Gold Price',
-          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={TrendingUp} focused={focused} color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={LineChart} focused={focused} color={color} size={size} />,
         }}
       />
       <Tabs.Screen

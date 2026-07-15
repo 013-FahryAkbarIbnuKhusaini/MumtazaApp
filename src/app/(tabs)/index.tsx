@@ -233,10 +233,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onPress={onPress}
       activeOpacity={0.95}
     >
-      <View className="relative w-full h-[200px] bg-[#F8F6F2] rounded-2xl overflow-hidden">
+      <View
+        className={`relative overflow-hidden rounded-2xl bg-[#F8F6F2] w-full ${product.size === 'large' ? 'h-[260px]' : 'h-[160px]'}`}
+      >
         <Image
           source={{ uri: product.image }}
-          className="absolute inset-0 w-full h-full"
+          style={{ width: '100%', height: '100%', position: 'absolute' }}
           resizeMode="cover"
         />
         {product.badge && (
