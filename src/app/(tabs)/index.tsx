@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu, ArrowRight } from 'lucide-react-native';
 import { Badge } from '../../components/ui/Badge';
-import { Chip } from '../../components/ui/Chip';
 
 // Color tokens are centralized in src/constants/theme.ts and consumed via
 // NativeWind utility classes (bg-primary, text-textPrimary, bg-surface, etc.).
@@ -65,7 +64,7 @@ const PRODUCTS: Product[] = [
   },
 ];
 
-const CATEGORIES: string[] = ['Cincin', 'Kalung', 'Gelang', 'Anting', 'Liontin', 'Logam Mulia'];
+const CATEGORIES: string[] = [ 'All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting', 'Liontin', 'Logam Mulia'];
 
 const HomeHeader: React.FC = () => {
   return (
@@ -179,22 +178,29 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
 }) => {
   return (
     <View className="mt-6">
-      <Text className="font-headingSemiBold text-textPrimary text-lg px-5">Categories</Text>
+      <View className="px-5">
+        <Text className="text-lg font-bold text-[#211D18] mb-3">Categories</Text>
+      </View>
       <View className="mt-3">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="px-5"
         >
-          {categories.map((category) => (
-            <Chip
-              key={category}
-              label={category}
-              selected={category === activeCategory}
-              onPress={() => onSelect?.(category)}
-              className="mr-3"
-            />
-          ))}
+          {categories.map((category) => {
+            const isActive = category === activeCategory;
+            return (
+              <Pressable
+                key={category}
+                onPress={() => onSelect?.(category)}
+                className={`rounded-full px-5 py-2 mr-3 ${isActive ? 'bg-transparent border border-[#C9A961]' : 'bg-[#F1EDE7]'}`}
+              >
+                <Text className={`text-sm font-medium ${isActive ? 'text-[#C9A961]' : 'text-[#7A756D]'}`}>
+                  {category}
+                </Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </View>
     </View>
@@ -227,8 +233,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onPress={onPress}
       activeOpacity={0.95}
     >
-      <View className="relative bg-[#F8F6F2] rounded-2xl overflow-hidden">
-        <Image source={{ uri: product.image }} className="w-full h-full" resizeMode="cover" />
+      <View className="relative w-full h-[200px] bg-[#F8F6F2] rounded-2xl overflow-hidden">
+        <Image
+          source={{ uri: product.image }}
+          className="absolute inset-0 w-full h-full"
+          resizeMode="cover"
+        />
         {product.badge && (
           <View className="absolute top-3 left-3 px-2 py-1 rounded-full ${product.badge === 'BEST SELLER' ? 'bg-[#785928]' : 'bg-white border border-gray-200'}">
             <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>
@@ -263,9 +273,9 @@ const FeaturedProductsSection: React.FC = () => {
   const smallProducts = PRODUCTS.filter((p) => p.size === 'small');
 
   return (
-    <View className="my-3 px-5">
+    <View className="my-3 px-5 mt-8">
       <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-xl font-bold text-black">Featured</Text>
+        <Text className="text-lg font-bold text-[#211D18] mb-3">Featured</Text>
         <Pressable className="flex-row items-center gap-1" onPress={() => {}}>
           <Text className="text-sm font-medium text-[#785928]">View All</Text>
           <ArrowRight size={16} color="#785928" />
@@ -284,13 +294,15 @@ const FeaturedProductsSection: React.FC = () => {
 };
 
 export default function HomeScreen() {
+  const [activeCategory, setActiveCategory] = React.useState('All Piece');
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-8">
         <HomeHeader />
         <SearchBar />
         <HeroBanner />
-        <CategoryPills categories={CATEGORIES} activeCategory="Rings" onSelect={() => {}} />
+        <CategoryPills categories={CATEGORIES} activeCategory={activeCategory} onSelect={setActiveCategory} />
         <FeaturedProductsSection />
       </ScrollView>
     </SafeAreaView>
