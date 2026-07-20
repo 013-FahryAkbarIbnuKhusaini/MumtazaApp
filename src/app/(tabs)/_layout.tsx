@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { Animated, ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, LineChart, ShoppingBag, User } from 'lucide-react-native';
 
 function AnimatedTabIcon({ IconComponent, focused, color, size }: { IconComponent: React.ElementType; focused: boolean; color: string | ColorValue; size: number }) {
@@ -23,6 +24,8 @@ function AnimatedTabIcon({ IconComponent, focused, color, size }: { IconComponen
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -37,9 +40,9 @@ export default function TabLayout() {
           shadowOffset: { width: 0, height: -2 },
           shadowOpacity: 0.06,
           shadowRadius: 8,
-          height: 64,
+          height: 64 + (insets.bottom > 0 ? insets.bottom : 0),
           paddingTop: 8,
-          paddingBottom: 8,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
         },
         tabBarLabelStyle: {
           fontSize: 11,

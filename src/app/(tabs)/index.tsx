@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TextInput,
   Platform,
   Pressable,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu, ArrowRight } from 'lucide-react-native';
@@ -165,6 +166,53 @@ const HeroBanner: React.FC = () => {
   );
 };
 
+function AnimatedCategoryPill({ label, isActive, onPress }: { label: string; isActive: boolean; onPress: () => void }) {
+  const progress = useRef(new Animated.Value(isActive ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: isActive ? 1 : 0,
+      duration: 220,
+      useNativeDriver: false, // backgroundColor/borderColor interpolation requires JS-driven animation
+    }).start();
+  }, [isActive]);
+
+  const backgroundColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#F1EDE7', 'rgba(201,169,97,0)'], // fades from beige fill to transparent
+  });
+  const borderColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(201,169,97,0)', '#C9A961'],
+  });
+  const textColor = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#7A756D', '#C9A961'],
+  });
+  const scale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.05],
+  });
+
+  return (
+    <Animated.View
+      style={{
+        backgroundColor,
+        borderColor,
+        borderWidth: 1,
+        transform: [{ scale }],
+      }}
+      className="rounded-full px-5 py-2 mr-2"
+    >
+      <Pressable onPress={onPress}>
+        <Animated.Text style={{ color: textColor }} className="text-sm font-medium">
+          {label}
+        </Animated.Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 interface CategoryPillsProps {
   categories: string[];
   activeCategory: string;
@@ -190,15 +238,12 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
           {categories.map((category) => {
             const isActive = category === activeCategory;
             return (
-              <Pressable
+              <AnimatedCategoryPill
                 key={category}
+                label={category}
+                isActive={isActive}
                 onPress={() => onSelect?.(category)}
-                className={`rounded-full px-5 py-2 mr-3 ${isActive ? 'bg-transparent border border-[#C9A961]' : 'bg-[#F1EDE7]'}`}
-              >
-                <Text className={`text-sm font-medium ${isActive ? 'text-[#C9A961]' : 'text-[#7A756D]'}`}>
-                  {category}
-                </Text>
-              </Pressable>
+              />
             );
           })}
         </ScrollView>
