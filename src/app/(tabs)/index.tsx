@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,62 +10,14 @@ import {
   Platform,
   Pressable,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Heart, Bell, ShoppingBag, ChevronRight, Menu, ArrowRight } from 'lucide-react-native';
-import { Badge } from '../../components/ui/Badge';
+import { Search, Bell, ShoppingBag, Menu, ArrowRight } from 'lucide-react-native';
+import { ProductCard } from '../../components/product/ProductCard';
+import { Product, ProductApi } from '../../types';
 
-// Color tokens are centralized in src/constants/theme.ts and consumed via
-// NativeWind utility classes (bg-primary, text-textPrimary, bg-surface, etc.).
-// Icon colors below reuse the same hex values from that theme.
-const ICON = {
-  gold: '#785928',
-  textPrimary: '#1A1C1C',
-  textSecondary: '#5E5E5E',
-  black: '#0D0D0D',
-};
-
-interface Product {
-  id: string;
-  title: string;
-  subtitle: string;
-  price: string;
-  image: string;
-  badge?: 'BEST SELLER' | 'INVESTMENT' | 'NEW';
-  size: 'large' | 'small';
-}
-
-// TODO: replace with real MUMTAZA product photography
-const PRODUCTS: Product[] = [
-  {
-    id: '1',
-    title: 'Surya Radiance Ring',
-    subtitle: '22K Gold • Handcrafted',
-    price: 'Rp 12.5M',
-    image: 'https://images.unsplash.com/photo-1605100804763-247f6612d48e?q=80&w=800',
-    badge: 'BEST SELLER',
-    size: 'large',
-  },
-  {
-    id: '2',
-    title: 'Minimalist Drop',
-    subtitle: '18K Gold Earrings',
-    price: 'Rp 4.2M',
-    image: 'https://images.unsplash.com/photo-1599643478524-fb66f70362fec?q=80&w=600',
-    size: 'small',
-  },
-  {
-    id: '3',
-    title: 'MUMTAZA 10g Bar',
-    subtitle: '99.99% Fine Gold',
-    price: 'Rp 11.8M',
-    image: 'https://images.unsplash.com/photo-1610375461246-83ff852e5b84?q=80&w=600',
-    badge: 'INVESTMENT',
-    size: 'small',
-  },
-];
-
-const CATEGORIES: string[] = [ 'All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting', 'Liontin', 'Logam Mulia'];
+const API_BASE_URL = 'https://emas.tokomumtaza.com';
 
 const HomeHeader: React.FC = () => {
   return (
@@ -175,19 +127,19 @@ function AnimatedCategoryPill({ label, isActive, onPress }: { label: string; isA
       duration: 220,
       useNativeDriver: false, // backgroundColor/borderColor interpolation requires JS-driven animation
     }).start();
-  }, [isActive]);
+  }, [isActive, progress]);
 
   const backgroundColor = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#F1EDE7', 'rgba(201,169,97,0)'], // fades from beige fill to transparent
+    outputRange: ['transparent', '#C9A961'], // inactive: transparent, active: gold fill
   });
   const borderColor = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['rgba(201,169,97,0)', '#C9A961'],
+    outputRange: ['#C9A961', '#C9A961'], // always gold outline
   });
   const textColor = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#7A756D', '#C9A961'],
+    outputRange: ['#7A756D', '#FFFFFF'], // inactive: muted, active: white
   });
   const scale = progress.interpolate({
     inputRange: [0, 1],
@@ -252,73 +204,11 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
   );
 };
 
-interface ProductCardProps {
-  product: Product;
-  onPress?: () => void;
-  onToggleFavorite?: () => void;
+interface FeaturedProductsSectionProps {
+  products: Product[];
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  onPress,
-  onToggleFavorite,
-}) => {
-  const isLarge = product.size === 'large';
-  const imageHeight = isLarge ? 'h-56' : 'h-36';
-  const cardWidth = isLarge ? 'w-full' : 'w-[48%]';
-
-  const badgeVariant =
-    product.badge === 'INVESTMENT' ? 'dark' : 'gold';
-  const badgeClassName =
-    product.badge === 'INVESTMENT' ? 'text-primary text-[10px]' : 'text-[10px]';
-
-  return (
-    <TouchableOpacity
-      className={`${cardWidth} bg-surface rounded-md overflow-hidden mb-4`}
-      onPress={onPress}
-      activeOpacity={0.95}
-    >
-      <View
-        className={`relative overflow-hidden rounded-2xl bg-[#F8F6F2] w-full ${product.size === 'large' ? 'h-[260px]' : 'h-[160px]'}`}
-      >
-        <Image
-          source={{ uri: product.image }}
-          style={{ width: '100%', height: '100%', position: 'absolute' }}
-          resizeMode="cover"
-        />
-        {product.badge && (
-          <View className="absolute top-3 left-3 px-2 py-1 rounded-full ${product.badge === 'BEST SELLER' ? 'bg-[#785928]' : 'bg-white border border-gray-200'}">
-            <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>
-          </View>
-        )}
-        <Pressable className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm" onPress={onToggleFavorite}>
-          <Heart size={16} color="#785928" fill={product.badge === 'BEST SELLER' ? '#785928' : 'transparent'} />
-        </Pressable>
-      </View>
-      <View className="p-3">
-        {product.size === 'large' ? (
-          <View className="flex-row justify-between items-start mt-3">
-            <View>
-              <Text className="text-base font-bold text-textPrimary">{product.title}</Text>
-              <Text className="text-sm text-textSecondary mt-1">{product.subtitle}</Text>
-            </View>
-            <Text className="text-base font-bold text-[#785928]">{product.price}</Text>
-          </View>
-        ) : (
-          <View className="flex-col mt-3">
-            <Text className="text-sm font-bold text-textPrimary" numberOfLines={1}>{product.title}</Text>
-            <Text className="text-sm font-bold text-[#785928] mt-1">{product.price}</Text>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-const FeaturedProductsSection: React.FC = () => {
-  const largeProduct = PRODUCTS.find((p) => p.size === 'large');
-  const smallProducts = PRODUCTS.filter((p) => p.size === 'small');
-
+const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products }) => {
   return (
     <View className="my-3 px-5 mt-8">
       <View className="flex-row justify-between items-center mb-4">
@@ -329,19 +219,87 @@ const FeaturedProductsSection: React.FC = () => {
         </Pressable>
       </View>
 
-      {largeProduct && <ProductCard product={largeProduct} onPress={() => {}} onToggleFavorite={() => {}} />}
+      {products.map((item, index) => {
+        if (index === 0) {
+          return (
+            <ProductCard
+              key={item.code}
+              product={{ ...item, size: 'large' }}
+              onPress={() => {}}
+              onToggleFavorite={() => {}}
+            />
+          );
+        }
 
-      <View className="flex-row justify-between">
-        {smallProducts.map((product) => (
-          <ProductCard key={product.id} product={product} onPress={() => {}} onToggleFavorite={() => {}} />
-        ))}
-      </View>
+        if (index === 1) {
+          return (
+            <View key="small-grid" className="flex-row flex-wrap justify-between">
+              {products.slice(1).map((smallItem) => (
+                <ProductCard
+                  key={smallItem.code}
+                  product={{ ...smallItem, size: 'small' }}
+                  onPress={() => {}}
+                  onToggleFavorite={() => {}}
+                />
+              ))}
+            </View>
+          );
+        }
+
+        return null;
+      })}
     </View>
   );
 };
 
 export default function HomeScreen() {
-  const [activeCategory, setActiveCategory] = React.useState('All Piece');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All Piece');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/mutasi`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const apiProducts: ProductApi[] = data.data.data;
+
+        const mappedProducts: Product[] = apiProducts.map((p) => ({
+          id: p.id.toString(),
+          name: p.name,
+          code: p.code,
+          category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
+          image: p.image,
+          karat: p.karat,
+          berat: p.berat,
+          isBestSeller: p.type_id === 1 || p.type_id === 2,
+          isNew: p.status === 'ADA',
+          isFavorited: Math.random() > 0.7,
+        }));
+
+        setProducts(mappedProducts);
+      } catch (e) {
+        console.error('Failed to fetch products:', e);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'All Piece') {
+      return products;
+    }
+    return products.filter((item) =>
+      item.category.toLowerCase().includes(selectedCategory.toLowerCase())
+    );
+  }, [products, selectedCategory]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -349,8 +307,21 @@ export default function HomeScreen() {
         <HomeHeader />
         <SearchBar />
         <HeroBanner />
-        <CategoryPills categories={CATEGORIES} activeCategory={activeCategory} onSelect={setActiveCategory} />
-        <FeaturedProductsSection />
+        <CategoryPills
+          categories={['All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting']}
+          activeCategory={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+        {isLoading ? (
+          <View className="items-center mt-12">
+            <ActivityIndicator size="large" color="#C9A961" />
+            <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
+          </View>
+        ) : filteredProducts.length === 0 ? (
+          <Text className="text-center text-textSecondary mt-12 font-body">No products found</Text>
+        ) : (
+          <FeaturedProductsSection products={filteredProducts} />
+        )}
       </ScrollView>
     </SafeAreaView>
   );

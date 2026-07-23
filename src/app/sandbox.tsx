@@ -33,10 +33,15 @@ export default function Sandbox() {
         <Badge label="New Arrival" variant="gold" />
 
         <ProductCard
-          image="https://via.placeholder.com/150"
-          name="Gold Necklace"
-          subtitle="24K Pure Gold"
-          price={5000000}
+          product={{
+            id: 'sandbox-1',
+            name: 'Kalung',
+            code: 'K2428KJB',
+            category: 'Kalung',
+            image: '1773203795.jpeg',
+            karat: '24K',
+            berat: '2.42',
+          }}
           onPress={() => {}}
         />
 
