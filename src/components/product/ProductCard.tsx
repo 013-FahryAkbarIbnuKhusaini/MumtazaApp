@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Image, TouchableOpacity, Text, Pressable } from 'react-native';
+import { View, Image, Text, Pressable } from 'react-native';
 import { Heart } from 'lucide-react-native';
 import { Product } from '../../types';
 
 interface ProductCardProps {
   product: Product;
+  isLiked: boolean;
   onPress?: () => void;
-  onToggleFavorite?: () => void;
+  onPressHeart: () => void;
 }
 
 function titleCase(str: string): string {
@@ -15,9 +16,17 @@ function titleCase(str: string): string {
 
 export const ProductCard = ({
   product,
+  isLiked,
   onPress,
-  onToggleFavorite,
+  onPressHeart,
 }: ProductCardProps) => {
+  const handleCardPress = () => {
+    console.log('Navigating to detail: ', product.id);
+    if (onPress) {
+      onPress();
+    }
+  };
+
   const isLarge = product.size === 'large';
 
   const displayName = `${titleCase(product.name)} - ${product.code}`;
@@ -25,10 +34,9 @@ export const ProductCard = ({
   const imageUrl = `https://www.emas.tokomumtaza.com/img/${product.image}`;
 
   return (
-    <TouchableOpacity
-      className={`${isLarge ? 'w-full' : 'w-[48%]'} bg-surface rounded-md overflow-hidden mb-4`}
-      onPress={onPress}
-      activeOpacity={0.95}
+    <Pressable
+      className={`${isLarge ? 'w-full' : 'w-[48%]'} bg-surface rounded-md overflow-hidden mb-4 active:opacity-90`}
+      onPress={handleCardPress}
     >
       <View
         className={`relative overflow-hidden rounded-2xl bg-[#F8F6F2] w-full ${isLarge ? 'h-56' : 'h-40'}`}
@@ -43,8 +51,8 @@ export const ProductCard = ({
             <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>
           </View>
         )}
-        <Pressable className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm" onPress={onToggleFavorite}>
-          <Heart size={16} color="#785928" fill={product.isFavorited ? '#785928' : 'transparent'} />
+        <Pressable className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm" onPress={(e) => { e.stopPropagation(); onPressHeart(); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Heart size={16} color={isLiked ? '#785928' : '#785928'} fill={isLiked ? '#785928' : 'transparent'} />
         </Pressable>
       </View>
       <View className="p-3">
@@ -63,7 +71,7 @@ export const ProductCard = ({
           </View>
         )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

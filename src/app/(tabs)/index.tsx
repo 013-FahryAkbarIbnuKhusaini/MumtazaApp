@@ -206,9 +206,11 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
 
 interface FeaturedProductsSectionProps {
   products: Product[];
+  likedIds: string[];
+  onPressHeart: (id: string) => void;
 }
 
-const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products }) => {
+const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products, likedIds, onPressHeart }) => {
   return (
     <View className="my-3 px-5 mt-8">
       <View className="flex-row justify-between items-center mb-4">
@@ -220,13 +222,15 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
       </View>
 
       {products.map((item, index) => {
+        const isLiked = likedIds.includes(item.id);
         if (index === 0) {
           return (
             <ProductCard
-              key={item.code}
+              key={item.id}
               product={{ ...item, size: 'large' }}
+              isLiked={isLiked}
               onPress={() => {}}
-              onToggleFavorite={() => {}}
+              onPressHeart={() => onPressHeart(item.id)}
             />
           );
         }
@@ -234,14 +238,18 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
         if (index === 1) {
           return (
             <View key="small-grid" className="flex-row flex-wrap justify-between">
-              {products.slice(1).map((smallItem) => (
-                <ProductCard
-                  key={smallItem.code}
-                  product={{ ...smallItem, size: 'small' }}
-                  onPress={() => {}}
-                  onToggleFavorite={() => {}}
-                />
-              ))}
+              {products.slice(1).map((smallItem) => {
+                const smallIsLiked = likedIds.includes(smallItem.id);
+                return (
+                  <ProductCard
+                    key={smallItem.id}
+                    product={{ ...smallItem, size: 'small' }}
+                    isLiked={smallIsLiked}
+                    onPress={() => {}}
+                    onPressHeart={() => onPressHeart(smallItem.id)}
+                  />
+                );
+              })}
             </View>
           );
         }
@@ -254,6 +262,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [likedIds, setLikedIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All Piece');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -267,20 +276,22 @@ export default function HomeScreen() {
         const data = await response.json();
         const apiProducts: ProductApi[] = data.data.data;
 
-        const mappedProducts: Product[] = apiProducts.map((p) => ({
-          id: p.id.toString(),
-          name: p.name,
-          code: p.code,
-          category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
-          image: p.image,
-          karat: p.karat,
-          berat: p.berat,
-          isBestSeller: p.type_id === 1 || p.type_id === 2,
-          isNew: p.status === 'ADA',
-          isFavorited: Math.random() > 0.7,
-        }));
+         const mappedProducts: Product[] = apiProducts.map((p) => ({
+           id: p.id.toString(),
+           name: p.name,
+           code: p.code,
+           category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
+           image: p.image,
+           karat: p.karat,
+           berat: p.berat,
+           isBestSeller: p.type_id === 1 || p.type_id === 2,
+           isNew: p.status === 'ADA',
+           isFavorited: Math.random() > 0.7,
+         }));
 
-        setProducts(mappedProducts);
+         setProducts(mappedProducts);
+         const initialLiked = mappedProducts.filter((p) => p.isFavorited).map((p) => p.id);
+         setLikedIds(initialLiked);
       } catch (e) {
         console.error('Failed to fetch products:', e);
         setProducts([]);
@@ -292,7 +303,16 @@ export default function HomeScreen() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = useMemo(() => {
+  const toggleLike = (id: string) => {
+    setLikedIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((likedId) => likedId !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  const filteredResults = useMemo(() => {
     if (selectedCategory === 'All Piece') {
       return products;
     }
@@ -317,10 +337,10 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" color="#C9A961" />
             <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
           </View>
-        ) : filteredProducts.length === 0 ? (
+        ) : filteredResults.length === 0 ? (
           <Text className="text-center text-textSecondary mt-12 font-body">No products found</Text>
         ) : (
-          <FeaturedProductsSection products={filteredProducts} />
+          <FeaturedProductsSection products={filteredResults} likedIds={likedIds} onPressHeart={toggleLike} />
         )}
       </ScrollView>
     </SafeAreaView>
