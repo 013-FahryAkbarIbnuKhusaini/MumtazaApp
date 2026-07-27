@@ -27,7 +27,7 @@ const HomeHeader: React.FC = () => {
         onPress={() => {}} // TODO: wire up drawer/menu navigation
         className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
       >
-        <Menu size={22} color="#211D18" />
+        <Menu size={22} color="#211d18" />
       </TouchableOpacity>
 
       {/* Center: brand wordmark, absolutely centered over full header width.
@@ -276,22 +276,19 @@ export default function HomeScreen() {
         const data = await response.json();
         const apiProducts: ProductApi[] = data.data.data;
 
-         const mappedProducts: Product[] = apiProducts.map((p) => ({
-           id: p.id.toString(),
-           name: p.name,
-           code: p.code,
-           category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
-           image: p.image,
-           karat: p.karat,
-           berat: p.berat,
-           isBestSeller: p.type_id === 1 || p.type_id === 2,
-           isNew: p.status === 'ADA',
-           isFavorited: Math.random() > 0.7,
-         }));
+        const mappedProducts: Product[] = apiProducts.map((p) => ({
+          id: p.id.toString(),
+          name: p.name,
+          code: p.code,
+          category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
+          image: p.image,
+          karat: p.karat,
+          berat: p.berat,
+          isBestSeller: p.type_id === 1 || p.type_id === 2,
+          isNew: p.status === 'ADA',
+        }));
 
-         setProducts(mappedProducts);
-         const initialLiked = mappedProducts.filter((p) => p.isFavorited).map((p) => p.id);
-         setLikedIds(initialLiked);
+          setProducts(mappedProducts);
       } catch (e) {
         console.error('Failed to fetch products:', e);
         setProducts([]);
