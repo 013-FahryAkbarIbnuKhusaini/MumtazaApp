@@ -16,52 +16,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Search, Bell, ShoppingBag, Menu, ArrowRight } from 'lucide-react-native';
 import { ProductCard } from '../../components/product/ProductCard';
+import SidebarMenu from '../../components/layout/SidebarMenu';
 import { Product, ProductApi } from '../../types';
 
 const API_BASE_URL = 'https://emas.tokomumtaza.com';
 
 const HomeHeader: React.FC = () => {
   const router = useRouter();
+  const [isSidebarVisible, setSidebarVisible] = useState(false);
   return (
-    <View className="relative flex-row items-center justify-between px-5 py-3">
-      {/* Left: hamburger menu */}
-      <TouchableOpacity
-        onPress={() => router.push('/menu')}
-        className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
-      >
-        <Menu size={22} color="#211d18" />
-      </TouchableOpacity>
-
-      {/* Center: brand wordmark, absolutely centered over full header width.
-          Serif is a platform fallback; swap for a loaded brand serif font later. */}
-      <View className="absolute left-0 right-0 items-center justify-center" pointerEvents="none">
-        <Text
-          className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
-          style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
-        >
-          MUMTAZA
-        </Text>
-      </View>
-
-      {/* Right: notification + bag icons */}
-      <View className="flex-row items-center gap-2">
+    <>
+      <View className="relative flex-row items-center justify-between px-5 py-3">
         <TouchableOpacity
-          onPress={() => router.push('/notifications')}
+          onPress={() => setSidebarVisible(true)}
           className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
         >
-          <Bell size={20} color="#211D18" />
+          <Menu size={22} color="#211d18" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push('/cart')}
-          className="relative w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
-        >
-          <ShoppingBag size={20} color="#211D18" />
-          <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
-            <Text className="text-white text-[10px] font-bodySemiBold">2</Text>
-          </View>
-        </TouchableOpacity>
+
+        <View className="absolute left-0 right-0 items-center justify-center" pointerEvents="none">
+          <Text
+            className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
+            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
+          >
+            MUMTAZA
+          </Text>
+        </View>
+
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity
+            onPress={() => console.log('Navigating to notifications')}
+            className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
+          >
+            <Bell size={20} color="#211D18" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push('/cart')}
+            className="relative w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
+          >
+            <ShoppingBag size={20} color="#211D18" />
+            <View className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary items-center justify-center">
+              <Text className="text-white text-[10px] font-bodySemiBold">2</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+      <SidebarMenu visible={isSidebarVisible} onClose={() => setSidebarVisible(false)} />
+    </>
   );
 };
 
