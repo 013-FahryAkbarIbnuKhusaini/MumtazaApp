@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Search, Bell, ShoppingBag, Menu, ArrowRight } from 'lucide-react-native';
 import { ProductCard } from '../../components/product/ProductCard';
 import { Product, ProductApi } from '../../types';
@@ -20,11 +21,12 @@ import { Product, ProductApi } from '../../types';
 const API_BASE_URL = 'https://emas.tokomumtaza.com';
 
 const HomeHeader: React.FC = () => {
+  const router = useRouter();
   return (
     <View className="relative flex-row items-center justify-between px-5 py-3">
       {/* Left: hamburger menu */}
       <TouchableOpacity
-        onPress={() => {}} // TODO: wire up drawer/menu navigation
+        onPress={() => router.push('/menu')}
         className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
       >
         <Menu size={22} color="#211d18" />
@@ -44,13 +46,13 @@ const HomeHeader: React.FC = () => {
       {/* Right: notification + bag icons */}
       <View className="flex-row items-center gap-2">
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => router.push('/notifications')}
           className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
         >
           <Bell size={20} color="#211D18" />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => router.push('/cart')}
           className="relative w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
         >
           <ShoppingBag size={20} color="#211D18" />
