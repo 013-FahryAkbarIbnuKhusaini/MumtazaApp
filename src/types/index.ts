@@ -18,6 +18,7 @@ export interface Product {
   image: string;
   karat: string;
   berat: string;
+  status: string;
   isBestSeller?: boolean;
   isNew?: boolean;
   size?: 'large' | 'small';

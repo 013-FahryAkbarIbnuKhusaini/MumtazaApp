@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, Text, Pressable } from 'react-native';
 import { Heart } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { Product } from '../../types';
 
 const GOLD_BASE_PRICE_PER_GRAM = 1350000;
@@ -22,8 +23,10 @@ export const ProductCard = ({
   onPress,
   onPressHeart,
 }: ProductCardProps) => {
+  const router = useRouter();
+
   const handleCardPress = () => {
-    console.log('Navigating to detail: ', product.id);
+    router.push({ pathname: '/product/[id]', params: { id: product.id, productData: JSON.stringify(product) } });
     if (onPress) {
       onPress();
     }
@@ -47,7 +50,7 @@ export const ProductCard = ({
 
   return (
     <Pressable
-      className={`${isLarge ? 'w-full' : 'w-[48%]'} bg-surface rounded-md overflow-hidden mb-4 active:opacity-90`}
+      className={`${isLarge ? 'w-full' : 'w-[48%]'} bg-white border border-[#E8E3DB] shadow-sm ${isLarge ? 'rounded-2xl' : 'rounded-xl'} overflow-hidden mb-4 active:opacity-90`}
       onPress={handleCardPress}
     >
       <View

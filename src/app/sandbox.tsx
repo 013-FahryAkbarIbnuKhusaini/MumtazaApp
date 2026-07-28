@@ -41,8 +41,11 @@ export default function Sandbox() {
             image: '1773203795.jpeg',
             karat: '24K',
             berat: '2.42',
+            status: 'ADA',
           }}
+          isLiked={false}
           onPress={() => {}}
+          onPressHeart={() => {}}
         />
 
         <QuantityStepper quantity={1} onIncrease={() => {}} onDecrease={() => {}} />

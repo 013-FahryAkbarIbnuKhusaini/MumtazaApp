@@ -287,6 +287,7 @@ export default function HomeScreen() {
           image: p.image,
           karat: p.karat,
           berat: p.berat,
+          status: p.status,
           isBestSeller: p.type_id === 1 || p.type_id === 2,
           isNew: p.status === 'ADA',
         }));
