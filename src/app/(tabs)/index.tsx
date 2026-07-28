@@ -268,41 +268,58 @@ export default function HomeScreen() {
   const [likedIds, setLikedIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All Piece');
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const fetchProducts = async (pageNum: number) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/mutasi?page=${pageNum}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      const apiProducts: ProductApi[] = data.data.data;
+      const totalPages: number = data.data.last_page;
+
+      const mappedProducts: Product[] = apiProducts.map((p) => ({
+        id: p.id.toString(),
+        name: p.name,
+        code: p.code,
+        category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
+        image: p.image,
+        karat: p.karat,
+        berat: p.berat,
+        status: p.status,
+        isBestSeller: p.type_id === 1 || p.type_id === 2,
+        isNew: p.status === 'ADA',
+      }));
+
+      setProducts((prev) => (pageNum === 1 ? mappedProducts : [...prev, ...mappedProducts]));
+      setLastPage(totalPages);
+    } catch (e) {
+      console.error('Failed to fetch products:', e);
+      if (pageNum === 1) {
+        setProducts([]);
+      }
+    } finally {
+      setIsLoading(false);
+      setIsFetchingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/mutasi`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const apiProducts: ProductApi[] = data.data.data;
+    setIsLoading(true);
+    setPage(1);
+    fetchProducts(1);
+  }, [selectedCategory]);
 
-        const mappedProducts: Product[] = apiProducts.map((p) => ({
-          id: p.id.toString(),
-          name: p.name,
-          code: p.code,
-          category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
-          image: p.image,
-          karat: p.karat,
-          berat: p.berat,
-          status: p.status,
-          isBestSeller: p.type_id === 1 || p.type_id === 2,
-          isNew: p.status === 'ADA',
-        }));
-
-          setProducts(mappedProducts);
-      } catch (e) {
-        console.error('Failed to fetch products:', e);
-        setProducts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  useEffect(() => {
+    if (page > 1) {
+      setIsFetchingMore(true);
+      fetchProducts(page);
+    }
+  }, [page]);
 
   const toggleLike = (id: string) => {
     setLikedIds((prev) => {
@@ -324,7 +341,18 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-8">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="pb-8"
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 500;
+          if (isCloseToBottom && !isFetchingMore && !isLoading && page < lastPage) {
+            setPage((prev) => prev + 1);
+          }
+        }}
+        scrollEventThrottle={16}
+      >
         <HomeHeader />
         <SearchBar />
         <HeroBanner />
@@ -342,6 +370,11 @@ export default function HomeScreen() {
           <Text className="text-center text-textSecondary mt-12 font-body">No products found</Text>
         ) : (
           <FeaturedProductsSection products={filteredResults} likedIds={likedIds} onPressHeart={toggleLike} />
+        )}
+        {isFetchingMore && (
+          <View className="py-5 items-center">
+            <ActivityIndicator size="large" color="#C9A961" />
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
