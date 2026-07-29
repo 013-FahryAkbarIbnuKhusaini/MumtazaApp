@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Search, Bell, ShoppingBag, Menu, ArrowRight } from 'lucide-react-native';
+import { Search, Bell, ShoppingBag, Menu } from 'lucide-react-native';
 import { ProductCard } from '../../components/product/ProductCard';
 import SidebarMenu from '../../components/layout/SidebarMenu';
 import { Product, ProductApi } from '../../types';
@@ -216,12 +216,8 @@ interface FeaturedProductsSectionProps {
 const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products, likedIds, onPressHeart }) => {
   return (
     <View className="my-3 px-5 mt-8">
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-lg font-bold text-[#211D18] mb-3">Featured</Text>
-        <Pressable className="flex-row items-center gap-1" onPress={() => {}}>
-          <Text className="text-sm font-medium text-[#785928]">View All</Text>
-          <ArrowRight size={16} color="#785928" />
-        </Pressable>
+      <View className="flex-row items-center mb-4">
+        <Text className="text-lg font-bold text-[#211D18] mb-3">Terbaru</Text>
       </View>
 
       {products.map((item, index) => {
