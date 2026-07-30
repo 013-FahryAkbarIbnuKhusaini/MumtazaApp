@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, Animated, Dimensions, Modal } from 'react-native';
+import { View, Text, Pressable, Animated, Dimensions, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Home, Grid3X3, History, Bell, Settings, User, X, ChevronRight, LogOut } from 'lucide-react-native';
 
 const DRAWER_WIDTH = Dimensions.get('window').width * 0.75;
@@ -17,6 +18,7 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const isMountedRef = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -71,6 +73,29 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
     // Closing is always user-initiated via animateOut() — never triggered by
     // the effect reacting to visible becoming false, to prevent double-triggering.
   }, [visible]);
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Konfirmasi Logout',
+      'Apakah Anda yakin ingin keluar dari akun ini?',
+      [
+        {
+          text: 'Batal',
+          style: 'cancel',
+          onPress: () => {},
+        },
+        {
+          text: 'Keluar',
+          style: 'destructive',
+          onPress: () => {
+            // TODO: clear auth token/session once auth state management is implemented
+            router.replace('/login');
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <Modal transparent animationType="none" visible={mounted} onRequestClose={animateOut}>
@@ -160,7 +185,7 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
 
             <View className="mt-auto px-6 pb-6 pt-4">
               <Pressable
-                onPress={() => console.log('Logout pressed')}
+                onPress={handleLogout}
                 className="flex-row items-center py-2"
               >
                 <LogOut size={20} color="#F87171" />
