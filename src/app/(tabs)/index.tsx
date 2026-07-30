@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Search, Bell, ShoppingBag, Menu } from 'lucide-react-native';
+import { Search, Bell, ShoppingBag, Menu, Package, Frown } from 'lucide-react-native';
 import { ProductCard } from '../../components/product/ProductCard';
 import SidebarMenu from '../../components/layout/SidebarMenu';
 import { Product, ProductApi } from '../../types';
@@ -66,21 +66,42 @@ const HomeHeader: React.FC = () => {
   );
 };
 
-const SearchBar: React.FC = () => {
+const SearchBar: React.FC<{
+  value: string;
+  onChangeText: (text: string) => void;
+}> = ({ value, onChangeText }) => {
   return (
     <View className="mt-4 mb-4 mx-5">
       <View className="flex-row items-center bg-[#F1EDE7] rounded-full px-4 py-3.5 border border-[#E8E3DB]">
         <View className="mr-2">
           <Search size={18} color="#7A756D" />
         </View>
-        {/* TODO: wire up search state/navigation */}
         <TextInput
           placeholder="Search collections, rings, necklaces..."
           placeholderTextColor="#7A756D"
           editable={true}
+          value={value}
+          onChangeText={onChangeText}
           className="flex-1 text-sm text-[#211D18]"
         />
       </View>
+    </View>
+  );
+};
+
+const EmptyState: React.FC<{ variant: 'emptyCategory' | 'noResults' }> = ({ variant }) => {
+  const isNoResults = variant === 'noResults';
+  return (
+    <View className="items-center py-20 px-5">
+      <View className="w-16 h-16 rounded-full bg-[#F5F0E6] items-center justify-center mb-4">
+        {isNoResults ? <Frown size={28} color="#C9A961" /> : <Package size={28} color="#C9A961" />}
+      </View>
+      <Text className="text-base font-bold text-[#211D18] text-center">
+        {isNoResults ? "Yah, barangnya nggak ketemu :(" : "Belum ada produk"}
+      </Text>
+      <Text className="text-sm text-[#7A756D] text-center mt-1">
+        {isNoResults ? "Coba cari dengan kata kunci lain atau pilih kategori berbeda" : "Pilih kategori lain untuk melihat produk"}
+      </Text>
     </View>
   );
 };
@@ -262,6 +283,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ produ
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [likedIds, setLikedIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Piece');
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -327,13 +349,22 @@ export default function HomeScreen() {
   };
 
   const filteredResults = useMemo(() => {
-    if (selectedCategory === 'All Piece') {
-      return products;
+    let filtered = products;
+    if (selectedCategory !== 'All Piece') {
+      filtered = filtered.filter((item) =>
+        item.category.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
     }
-    return products.filter((item) =>
-      item.category.toLowerCase().includes(selectedCategory.toLowerCase())
-    );
-  }, [products, selectedCategory]);
+    const query = searchQuery.trim().toLowerCase();
+    if (query !== '') {
+      filtered = filtered.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(query) ||
+          item.code?.toLowerCase().includes(query)
+      );
+    }
+    return filtered;
+  }, [products, selectedCategory, searchQuery]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -350,7 +381,7 @@ export default function HomeScreen() {
           }
         }}
       >
-        <SearchBar />
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         <HeroBanner />
         <CategoryPills
           categories={['All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting']}
@@ -363,7 +394,7 @@ export default function HomeScreen() {
             <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
           </View>
         ) : filteredResults.length === 0 ? (
-          <Text className="text-center text-textSecondary mt-12 font-body">No products found</Text>
+          searchQuery.trim() !== '' ? <EmptyState variant="noResults" /> : <EmptyState variant="emptyCategory" />
         ) : (
           <FeaturedProductsSection products={filteredResults} likedIds={likedIds} onPressHeart={toggleLike} />
         )}
