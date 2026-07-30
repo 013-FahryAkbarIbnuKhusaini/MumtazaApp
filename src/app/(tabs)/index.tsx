@@ -68,7 +68,7 @@ const HomeHeader: React.FC = () => {
 
 const SearchBar: React.FC = () => {
   return (
-    <View className="mt-6 mb-8 mx-5">
+    <View className="mt-4 mb-4 mx-5">
       <View className="flex-row items-center bg-[#F1EDE7] rounded-full px-4 py-3.5 border border-[#E8E3DB]">
         <View className="mr-2">
           <Search size={18} color="#7A756D" />
@@ -180,7 +180,7 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
   onSelect,
 }) => {
   return (
-    <View className="mt-6">
+    <View className="mt-2">
       <View className="px-5">
         <Text className="text-lg font-bold text-[#211D18] mb-3">Categories</Text>
       </View>
@@ -337,9 +337,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-8"
+        scrollEventThrottle={16}
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
           const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 500;
@@ -347,9 +349,7 @@ export default function HomeScreen() {
             setPage((prev) => prev + 1);
           }
         }}
-        scrollEventThrottle={16}
       >
-        <HomeHeader />
         <SearchBar />
         <HeroBanner />
         <CategoryPills
