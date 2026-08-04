@@ -1,5 +1,5 @@
-import Sandbox from './sandbox';
+import { Redirect } from 'expo-router';
 
 export default function Index() {
-  return <Sandbox />;
+  return <Redirect href={"/(tabs)" as any} />;
 }

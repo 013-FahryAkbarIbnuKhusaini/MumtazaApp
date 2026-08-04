@@ -11,18 +11,11 @@ import {
   Pressable,
   Animated,
   ActivityIndicator,
-<<<<<<< HEAD
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Search, Bell, ShoppingBag, Menu, Package, Frown } from 'lucide-react-native';
-=======
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Search, Bell, ShoppingBag, Menu, Package, Frown, ArrowUp } from 'lucide-react-native';
->>>>>>> b7d6c58 (SUDAH)
 import { ProductCard } from '../../components/product/ProductCard';
 import SidebarMenu from '../../components/layout/SidebarMenu';
 import { Product, ProductApi } from '../../types';
@@ -297,12 +290,9 @@ export default function HomeScreen() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-<<<<<<< HEAD
-=======
   const [refreshing, setRefreshing] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
->>>>>>> b7d6c58 (SUDAH)
 
   const fetchProducts = async (pageNum: number) => {
     try {
@@ -362,8 +352,6 @@ export default function HomeScreen() {
     });
   };
 
-<<<<<<< HEAD
-=======
   const onRefresh = async () => {
     setRefreshing(true);
     setPage(1);
@@ -375,7 +363,6 @@ export default function HomeScreen() {
     }
   };
 
->>>>>>> b7d6c58 (SUDAH)
   const filteredResults = useMemo(() => {
     let filtered = products;
     if (selectedCategory !== 'All Piece') {
@@ -398,26 +385,18 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <HomeHeader />
       <ScrollView
-<<<<<<< HEAD
-=======
         ref={scrollViewRef}
->>>>>>> b7d6c58 (SUDAH)
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-8"
         scrollEventThrottle={16}
         onScroll={({ nativeEvent }) => {
           const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-<<<<<<< HEAD
-=======
           setShowScrollTop(contentOffset.y > 500);
->>>>>>> b7d6c58 (SUDAH)
           const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 500;
           if (isCloseToBottom && !isFetchingMore && !isLoading && page < lastPage) {
             setPage((prev) => prev + 1);
           }
         }}
-<<<<<<< HEAD
-=======
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -426,7 +405,6 @@ export default function HomeScreen() {
             colors={['#C9A961']}
           />
         }
->>>>>>> b7d6c58 (SUDAH)
       >
         <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
         <HeroBanner />
@@ -451,8 +429,6 @@ export default function HomeScreen() {
           </View>
         )}
       </ScrollView>
-<<<<<<< HEAD
-=======
       {showScrollTop && (
         <Pressable
           onPress={() => scrollViewRef.current?.scrollTo({ y: 0, animated: true })}
@@ -462,7 +438,6 @@ export default function HomeScreen() {
           <ArrowUp size={22} color="#FFFFFF" />
         </Pressable>
       )}
->>>>>>> b7d6c58 (SUDAH)
     </SafeAreaView>
   );
 }
