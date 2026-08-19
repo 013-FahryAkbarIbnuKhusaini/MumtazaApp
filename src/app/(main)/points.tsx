@@ -176,7 +176,7 @@ export default function PointsScreen() {
             </Text>
 
             <View className="bg-white rounded-2xl border border-stone-100 shadow-sm shadow-stone-200 overflow-hidden">
-              <Pressable className="flex-row items-center px-4 py-4 gap-3 border-b border-stone-100">
+              <Pressable onPress={() => router.push('/(main)/vouchers' as any)} className="flex-row items-center px-4 py-4 gap-3 border-b border-stone-100">
                 <View className="w-10 h-10 rounded-full bg-stone-100 items-center justify-center">
                   <Feather name="tag" size={18} color="#785928" />
                 </View>
@@ -215,8 +215,8 @@ export default function PointsScreen() {
             </Text>
 
             <View className="bg-stone-100 rounded-2xl flex-row items-center p-3 gap-3">
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1599643478514-4a820cbf311e?q=80&w=200&auto=format&fit=crop' }} resizeMode="cover" className="w-12 h-12 rounded-lg bg-stone-200" />
-              <View className="flex-1 ml-1">/
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=200&auto=format&fit=crop&q=80' }} resizeMode="cover" className="w-12 h-12 rounded-lg bg-stone-200" />
+              <View className="flex-1 ml-1">
                 <Text className="text-[10px] uppercase tracking-widest font-bold text-stone-400">
                   EXCLUSIVE OFFERS
                 </Text>

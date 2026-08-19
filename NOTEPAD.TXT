@@ -14,4 +14,4 @@ Kasih catatan: git commit -m "tulis pesan di sini"
 
 Kirim: git push origin main 
 
-(Pastikan semua file sudah di-Save/Ctrl+S sebelum git add biar nggak ada perubahan yang ketinggalan).
+(Pastikan semua file sudah di-Save/Ctrl+S sebelum git add biar nggak ada perubahan yang ketinggalan). 
