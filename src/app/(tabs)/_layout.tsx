@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { Animated, ColorValue } from 'react-native';
+import { Animated, ColorValue, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, LineChart, ShoppingBag, User } from 'lucide-react-native';
 
@@ -30,16 +30,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#C9A961',
-        tabBarInactiveTintColor: '#7A756D',
+        tabBarActiveBackgroundColor: 'transparent',
+        tabBarInactiveBackgroundColor: 'transparent',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopWidth: 0,
-          elevation: 8,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
+          borderTopColor: '#F5F5F4',
+          borderTopWidth: 1,
+          elevation: 0,
+          shadowOpacity: 0,
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 0,
           height: 64 + (insets.bottom > 0 ? insets.bottom : 0),
           paddingTop: 8,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
@@ -48,35 +48,63 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: '500',
         },
-
+        tabBarButton: (props) => {
+          const { ref, ...rest } = props as any;
+          return (
+            <Pressable
+              {...rest}
+              android_ripple={null}
+            />
+          );
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={Home} focused={focused} color={color} size={size} />,
+          tabBarIcon: ({ size, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <AnimatedTabIcon IconComponent={Home} focused={focused} color={focused ? '#785928' : '#A8A29E'} size={size} />
+              {focused ? <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#785928', marginTop: 4 }} /> : null}
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="gold-price"
         options={{
           title: 'Gold Price',
-          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={LineChart} focused={focused} color={color} size={size} />,
+          tabBarIcon: ({ size, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <AnimatedTabIcon IconComponent={LineChart} focused={focused} color={focused ? '#785928' : '#A8A29E'} size={size} />
+              {focused ? <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#785928', marginTop: 4 }} /> : null}
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
           title: 'Cart',
-          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={ShoppingBag} focused={focused} color={color} size={size} />,
+          tabBarIcon: ({ size, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <AnimatedTabIcon IconComponent={ShoppingBag} focused={focused} color={focused ? '#785928' : '#A8A29E'} size={size} />
+              {focused ? <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#785928', marginTop: 4 }} /> : null}
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size, focused }) => <AnimatedTabIcon IconComponent={User} focused={focused} color={color} size={size} />,
+          tabBarIcon: ({ size, focused }) => (
+            <View style={{ alignItems: 'center' }}>
+              <AnimatedTabIcon IconComponent={User} focused={focused} color={focused ? '#785928' : '#A8A29E'} size={size} />
+              {focused ? <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#785928', marginTop: 4 }} /> : null}
+            </View>
+          ),
         }}
       />
     </Tabs>
