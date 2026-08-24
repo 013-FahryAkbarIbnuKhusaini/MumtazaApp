@@ -81,7 +81,7 @@ export default function VoucherDetailScreen() {
         {/* ----------------------------------------------------------------- */}
         {/* 3. TICKET CARD                                                    */}
         {/* ----------------------------------------------------------------- */}
-        <View className="bg-[#FDFBF7] rounded-2xl p-6 mb-6">
+        <View className="bg-[#FDFBF7] rounded-2xl p-6 mb-8">
           {/* Icon circle */}
           <View className="w-12 h-12 rounded-full bg-[#F3EFEA] mx-auto items-center justify-center">
             <Feather name="percent" size={20} color="#785928" />
@@ -95,17 +95,6 @@ export default function VoucherDetailScreen() {
           {/* Description */}
           <Text className="text-sm text-stone-500 text-center mt-2 px-4">
             {description}
-          </Text>
-
-          {/* Dashed separator */}
-          <View
-            className="my-5 border-t border-[#785928]/20"
-            style={{ borderStyle: 'dashed' }}
-          />
-
-          {/* Code */}
-          <Text className="text-sm font-medium text-stone-500 text-center">
-            {VOUCHER_CODE}
           </Text>
         </View>
 

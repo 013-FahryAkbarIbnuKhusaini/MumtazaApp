@@ -127,16 +127,10 @@ function AnimatedHistoryRow({
         </Text>
       </View>
 
-      {/* Right Side: Points + Chevron */}
+      {/* Right Side: Points */}
       <Text className="text-sm font-bold text-slate-800">
         {formattedPoints}
       </Text>
-      <Feather
-        name="chevron-right"
-        size={16}
-        color="#d6d3d1"
-        style={{ marginLeft: 8 }}
-      />
     </Animated.View>
   );
 }

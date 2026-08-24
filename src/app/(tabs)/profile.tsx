@@ -51,16 +51,10 @@ export default function ProfileScreen() {
   const menuItems: MenuItem[] = [
     {
       id: 'point',
-      label: 'Point',
+      label: 'Point & Voucher',
       iconFamily: 'Ionicons',
       iconName: 'cash-outline',
       onPress: () => router.push('/(main)/points' as any),
-    },
-    {
-      id: 'voucher',
-      label: 'Voucher',
-      iconFamily: 'Feather',
-      iconName: 'percent',
     },
     {
       id: 'addresses',
