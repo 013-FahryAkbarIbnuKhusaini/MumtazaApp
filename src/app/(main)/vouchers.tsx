@@ -19,7 +19,7 @@ interface Voucher {
 const VOUCHERS: Voucher[] = [
   {
     id: '1',
-    title: 'Rp 500,000 Off',
+    title: 'Up To Rp 500,000 Off',
     description: 'Applicable for all Gold Rings & Signets',
     coinCost: 1000,
     icon: 'percent',
@@ -35,9 +35,9 @@ const VOUCHERS: Voucher[] = [
   },
   {
     id: '3',
-    title: 'Rp 1,200,000 Off',
+    title: 'Up To Rp 1,000,000 Off',
     description: 'Exclusive for Premium Diamond Collection',
-    coinCost: 2400,
+    coinCost: 1800,
     icon: 'percent',
     category: 'discounts',
   },
@@ -108,9 +108,11 @@ function AnimatedRedeemButton({ onPress }: { onPress?: () => void }) {
 function AnimatedVoucherCard({
   voucher,
   index,
+  onRedeem,
 }: {
   voucher: Voucher;
   index: number;
+  onRedeem?: () => void;
 }) {
   const translateY = useRef(new Animated.Value(20)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -165,7 +167,7 @@ function AnimatedVoucherCard({
             {voucher.coinCost.toLocaleString('en-US')} Coins
           </Text>
         </View>
-        <AnimatedRedeemButton />
+        <AnimatedRedeemButton onPress={onRedeem} />
       </View>
     </Animated.View>
   );
@@ -252,6 +254,16 @@ export default function VouchersScreen() {
               key={voucher.id}
               voucher={voucher}
               index={index}
+              onRedeem={() =>
+                router.push({
+                  pathname: '/(main)/voucher-detail',
+                  params: {
+                    title: voucher.title,
+                    coins: String(voucher.coinCost),
+                    desc: voucher.description,
+                  },
+                })
+              }
             />
           ))}
         </View>

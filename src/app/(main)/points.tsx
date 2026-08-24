@@ -191,7 +191,7 @@ export default function PointsScreen() {
                 <Feather name="chevron-right" size={18} color="#d6d3d1" />
               </Pressable>
 
-              <Pressable className="flex-row items-center px-4 py-4 gap-3">
+              <Pressable onPress={() => router.push('/(main)/history' as any)} className="flex-row items-center px-4 py-4 gap-3">
                 <View className="w-10 h-10 rounded-full bg-stone-100 items-center justify-center">
                   <Feather name="clock" size={18} color="#785928" />
                 </View>
