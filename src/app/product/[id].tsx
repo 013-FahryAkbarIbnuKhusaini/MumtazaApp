@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, ScrollView, Image, Linking } from 'react-native';
+import { View, Text, Pressable, ScrollView, Linking } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, ShoppingBag } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -90,12 +91,26 @@ export default function ProductDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        <Image
-          source={imageError ? require('../../../assets/images/logoP.png') : { uri: imageUrl }}
-          style={{ width: '100%', height: 400 }}
-          resizeMode="cover"
-          onError={() => setImageError(true)}
-        />
+        {imageError ? (
+          <View className="bg-stone-100 items-center justify-center p-8" style={{ width: '100%', height: 400 }}>
+            <Image
+              source={require('../../../assets/images/logo-mumtaza-hd.png')}
+              className="bg-stone-100"
+              style={{ width: '100%', height: '100%' }}
+              contentFit="contain"
+              transition={300}
+            />
+          </View>
+        ) : (
+          <Image
+            source={{ uri: imageUrl }}
+            className="bg-stone-100"
+            style={{ width: '100%', height: 400 }}
+            contentFit="cover"
+            transition={300}
+            onError={() => setImageError(true)}
+          />
+        )}
 
         <View className="bg-white rounded-b-3xl px-5 py-5 shadow-sm">
           <Text className="text-2xl font-bold text-[#C9A961]">{displayPrice}</Text>

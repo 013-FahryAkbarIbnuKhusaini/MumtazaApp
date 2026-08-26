@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Image, Text, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Product } from '../../types';
@@ -50,18 +51,32 @@ export const ProductCard = ({
 
   return (
     <Pressable
-      className={`${isLarge ? 'w-full' : 'w-[48%]'} bg-white border border-[#E8E3DB] shadow-sm ${isLarge ? 'rounded-2xl' : 'rounded-xl'} overflow-hidden mb-4 active:opacity-90`}
+      className={`w-full bg-white border border-[#E8E3DB] shadow-sm ${isLarge ? 'rounded-2xl' : 'rounded-xl'} overflow-hidden mb-4 active:opacity-90`}
       onPress={handleCardPress}
     >
       <View
-        className={`relative overflow-hidden rounded-2xl bg-[#F8F6F2] w-full ${isLarge ? 'h-56' : 'h-40'}`}
+        className={`relative overflow-hidden rounded-2xl w-full ${isLarge ? 'h-56' : 'h-40'}`}
       >
-        <Image
-          source={imageError ? require('../../../assets/images/logoP.png') : { uri: imageUrl }}
-          style={{ width: '100%', height: '100%', position: 'absolute' }}
-          resizeMode="cover"
-          onError={() => setImageError(true)}
-        />
+        {imageError ? (
+          <View className="absolute inset-0 bg-stone-100 items-center justify-center p-4">
+            <Image
+              source={require('../../../assets/images/logo-mumtaza-hd.png')}
+              className="bg-stone-100"
+              style={{ width: '100%', height: '100%' }}
+              contentFit="contain"
+              transition={300}
+            />
+          </View>
+        ) : (
+          <Image
+            source={{ uri: imageUrl }}
+            className="bg-stone-100"
+            style={{ width: '100%', height: '100%', position: 'absolute' }}
+            contentFit="cover"
+            transition={300}
+            onError={() => setImageError(true)}
+          />
+        )}
         {product.badge && (
           <View className="absolute top-3 left-3 px-2 py-1 rounded-full ${product.badge === 'BEST SELLER' ? 'bg-[#785928]' : 'bg-white border border-gray-200'}">
             <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>

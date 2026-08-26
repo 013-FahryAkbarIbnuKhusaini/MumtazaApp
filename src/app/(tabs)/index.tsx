@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
-  Image,
   ImageBackground,
   ScrollView,
+  FlatList,
   TouchableOpacity,
   TextInput,
   Platform,
@@ -229,58 +229,6 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
   );
 };
 
-interface FeaturedProductsSectionProps {
-  products: Product[];
-  likedIds: string[];
-  onPressHeart: (id: string) => void;
-}
-
-const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({ products, likedIds, onPressHeart }) => {
-  return (
-    <View className="my-3 px-5 mt-8">
-      <View className="flex-row items-center mb-4">
-        <Text className="text-lg font-bold text-[#211D18] mb-3">Terbaru</Text>
-      </View>
-
-      {products.map((item, index) => {
-        const isLiked = likedIds.includes(item.id);
-        if (index === 0) {
-          return (
-            <ProductCard
-              key={item.id}
-              product={{ ...item, size: 'large' }}
-              isLiked={isLiked}
-              onPress={() => {}}
-              onPressHeart={() => onPressHeart(item.id)}
-            />
-          );
-        }
-
-        if (index === 1) {
-          return (
-            <View key="small-grid" className="flex-row flex-wrap justify-between">
-              {products.slice(1).map((smallItem) => {
-                const smallIsLiked = likedIds.includes(smallItem.id);
-                return (
-                  <ProductCard
-                    key={smallItem.id}
-                    product={{ ...smallItem, size: 'small' }}
-                    isLiked={smallIsLiked}
-                    onPress={() => {}}
-                    onPressHeart={() => onPressHeart(smallItem.id)}
-                  />
-                );
-              })}
-            </View>
-          );
-        }
-
-        return null;
-      })}
-    </View>
-  );
-};
-
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [likedIds, setLikedIds] = useState<string[]>([]);
@@ -292,7 +240,7 @@ export default function HomeScreen() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const flatListRef = useRef<FlatList<Product>>(null);
 
   const fetchProducts = async (pageNum: number) => {
     try {
@@ -343,14 +291,14 @@ export default function HomeScreen() {
     }
   }, [page]);
 
-  const toggleLike = (id: string) => {
+  const toggleLike = useCallback((id: string) => {
     setLikedIds((prev) => {
       if (prev.includes(id)) {
         return prev.filter((likedId) => likedId !== id);
       }
       return [...prev, id];
     });
-  };
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -381,22 +329,91 @@ export default function HomeScreen() {
     return filtered;
   }, [products, selectedCategory, searchQuery]);
 
+  // First product renders as a large card in the header; rest go into the 2-column FlatList grid
+  const firstProduct = filteredResults.length > 0 ? filteredResults[0] : null;
+  const gridProducts = useMemo(() => filteredResults.slice(1), [filteredResults]);
+
+  const handleEndReached = useCallback(() => {
+    if (!isFetchingMore && !isLoading && page < lastPage) {
+      setPage((prev) => prev + 1);
+    }
+  }, [isFetchingMore, isLoading, page, lastPage]);
+
+  const renderGridItem = useCallback(({ item, index }: { item: Product; index: number }) => {
+    const isLiked = likedIds.includes(item.id);
+    const isLeft = index % 2 === 0;
+    return (
+      <View style={{ flex: 1, paddingLeft: isLeft ? 20 : 4, paddingRight: isLeft ? 4 : 20 }}>
+        <ProductCard
+          product={{ ...item, size: 'small' }}
+          isLiked={isLiked}
+          onPress={() => {}}
+          onPressHeart={() => toggleLike(item.id)}
+        />
+      </View>
+    );
+  }, [likedIds, toggleLike]);
+
+  const keyExtractor = useCallback((item: Product) => item.id, []);
+
+  const ListHeader = useMemo(() => (
+    <>
+      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <HeroBanner />
+      <CategoryPills
+        categories={['All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting']}
+        activeCategory={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
+      {isLoading ? (
+        <View className="items-center mt-12">
+          <ActivityIndicator size="large" color="#C9A961" />
+          <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
+        </View>
+      ) : filteredResults.length === 0 ? (
+        searchQuery.trim() !== '' ? <EmptyState variant="noResults" /> : <EmptyState variant="emptyCategory" />
+      ) : (
+        <View className="px-5 mt-8">
+          <View className="flex-row items-center mb-4">
+            <Text className="text-lg font-bold text-[#211D18] mb-3">Terbaru</Text>
+          </View>
+          {firstProduct && (
+            <ProductCard
+              product={{ ...firstProduct, size: 'large' }}
+              isLiked={likedIds.includes(firstProduct.id)}
+              onPress={() => {}}
+              onPressHeart={() => toggleLike(firstProduct.id)}
+            />
+          )}
+        </View>
+      )}
+    </>
+  ), [searchQuery, selectedCategory, isLoading, filteredResults, firstProduct, likedIds, toggleLike]);
+
+  const ListFooter = useMemo(() => {
+    if (!isFetchingMore) return null;
+    return (
+      <View className="py-5 items-center">
+        <ActivityIndicator size="large" color="#C9A961" />
+      </View>
+    );
+  }, [isFetchingMore]);
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <HomeHeader />
-      <ScrollView
-        ref={scrollViewRef}
+      <FlatList
+        ref={flatListRef}
+        data={gridProducts}
+        renderItem={renderGridItem}
+        keyExtractor={keyExtractor}
+        numColumns={2}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-8"
-        scrollEventThrottle={16}
-        onScroll={({ nativeEvent }) => {
-          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-          setShowScrollTop(contentOffset.y > 500);
-          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 500;
-          if (isCloseToBottom && !isFetchingMore && !isLoading && page < lastPage) {
-            setPage((prev) => prev + 1);
-          }
-        }}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -405,33 +422,17 @@ export default function HomeScreen() {
             colors={['#C9A961']}
           />
         }
-      >
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-        <HeroBanner />
-        <CategoryPills
-          categories={['All Piece', 'Cincin', 'Kalung', 'Gelang', 'Anting']}
-          activeCategory={selectedCategory}
-          onSelect={setSelectedCategory}
-        />
-        {isLoading ? (
-          <View className="items-center mt-12">
-            <ActivityIndicator size="large" color="#C9A961" />
-            <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
-          </View>
-        ) : filteredResults.length === 0 ? (
-          searchQuery.trim() !== '' ? <EmptyState variant="noResults" /> : <EmptyState variant="emptyCategory" />
-        ) : (
-          <FeaturedProductsSection products={filteredResults} likedIds={likedIds} onPressHeart={toggleLike} />
-        )}
-        {isFetchingMore && (
-          <View className="py-5 items-center">
-            <ActivityIndicator size="large" color="#C9A961" />
-          </View>
-        )}
-      </ScrollView>
+        onScroll={({ nativeEvent }) => {
+          setShowScrollTop(nativeEvent.contentOffset.y > 500);
+        }}
+        scrollEventThrottle={16}
+        initialNumToRender={6}
+        windowSize={5}
+        removeClippedSubviews={true}
+      />
       {showScrollTop && (
         <Pressable
-          onPress={() => scrollViewRef.current?.scrollTo({ y: 0, animated: true })}
+          onPress={() => flatListRef.current?.scrollToOffset({ offset: 0, animated: true })}
           className="absolute bottom-28 right-5 w-12 h-12 rounded-full items-center justify-center shadow-lg"
           style={{ backgroundColor: '#C9A961' }}
         >

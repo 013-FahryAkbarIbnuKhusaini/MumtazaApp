@@ -4,7 +4,8 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  Modal,
+  Pressable,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,21 +33,7 @@ interface MenuItem {
 export default function ProfileScreen() {
   const router = useRouter();
   const [isSidebarVisible, setSidebarVisible] = useState(false);
-
-  const handleLogOut = () => {
-    Alert.alert(
-      'Konfirmasi',
-      'Apakah Anda yakin ingin keluar?',
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Keluar',
-          style: 'destructive',
-          onPress: () => router.replace('/(auth)/login'),
-        },
-      ]
-    );
-  };
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
 
   const menuItems: MenuItem[] = [
     {
@@ -79,7 +66,7 @@ export default function ProfileScreen() {
       label: 'Log Out',
       iconFamily: 'Feather',
       iconName: 'log-out',
-      onPress: handleLogOut,
+      onPress: () => setLogoutModalVisible(true),
       isDestructive: true,
     },
   ];
@@ -226,6 +213,47 @@ export default function ProfileScreen() {
           })}
         </View>
       </ScrollView>
+
+      {/* Logout Confirmation Modal */}
+      <Modal transparent={true} visible={isLogoutModalVisible} animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/40 px-6">
+          <View className="w-full bg-white rounded-[24px] p-6 items-center shadow-lg">
+
+            {/* Icon Circle */}
+            <View className="w-14 h-14 rounded-full bg-stone-50 justify-center items-center mb-4">
+              <Feather name="log-out" size={24} color="#785928" />
+            </View>
+
+            {/* Title & Subtitle */}
+            <Text className="text-lg font-bold text-slate-800 mb-2">Sign Out</Text>
+            <Text className="text-sm text-stone-500 text-center mb-6">
+              Are you sure you want to log out of your account?
+            </Text>
+
+            {/* Button Row */}
+            <View className="flex-row w-full gap-3">
+              {/* Cancel Button */}
+              <Pressable
+                className="flex-1 py-3.5 rounded-full bg-stone-100 items-center"
+                onPress={() => setLogoutModalVisible(false)}
+              >
+                <Text className="text-sm font-bold text-stone-500">Cancel</Text>
+              </Pressable>
+
+              {/* Confirm Logout Button */}
+              <Pressable
+                className="flex-1 py-3.5 rounded-full bg-[#785928] items-center"
+                onPress={() => {
+                  setLogoutModalVisible(false);
+                  router.replace('/(auth)/login');
+                }}
+              >
+                <Text className="text-sm font-bold text-white">Sign Out</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
