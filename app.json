@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "MumtazaApp",
-    "slug": "MumtazaApp",
+    "name": "Emas",
+    "slug": "emas",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mumtazaapp",
+    "scheme": "emas",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
