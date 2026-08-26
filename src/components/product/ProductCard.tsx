@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Product } from '../../types';
 
 const GOLD_BASE_PRICE_PER_GRAM = 1350000;
+const FALLBACK_LOGO = require('../../../assets/images/logo-mumtaza-hd.png');
 
 interface ProductCardProps {
   product: Product;
@@ -37,12 +38,21 @@ export const ProductCard = ({
 
   const displayName = `${titleCase(product.name)} - ${product.code}`;
   const displaySubtitle = `${product.karat} Gold • ${product.berat}g`;
-  const imageUrl = `https://www.emas.tokomumtaza.com/img/${product.image}`;
+
+  // Proactive URL validity check: treat missing, empty, and whitespace-only as "no image"
+  const hasValidImage = product.image != null && product.image.trim() !== '';
+  const imageUrl = hasValidImage
+    ? `https://www.emas.tokomumtaza.com/img/${product.image}`
+    : '';
+
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     setImageError(false);
   }, [product.id]);
+
+  // Show fallback when data says no image OR when a valid URL failed at runtime
+  const showFallback = !hasValidImage || imageError;
 
   const rawWeight = parseFloat(product.berat);
   const weight: number = isNaN(rawWeight) ? 0 : rawWeight;
@@ -55,25 +65,24 @@ export const ProductCard = ({
       onPress={handleCardPress}
     >
       <View
-        className={`relative overflow-hidden rounded-2xl w-full ${isLarge ? 'h-56' : 'h-40'}`}
+        className={`relative overflow-hidden bg-stone-200 rounded-t-xl w-full ${isLarge ? 'h-56' : 'h-40'}`}
       >
-        {imageError ? (
-          <View className="absolute inset-0 bg-stone-100 items-center justify-center p-4">
+        {showFallback ? (
+          <View className="absolute inset-0 items-center justify-center p-4">
             <Image
-              source={require('../../../assets/images/logo-mumtaza-hd.png')}
-              className="bg-stone-100"
+              source={FALLBACK_LOGO}
               style={{ width: '100%', height: '100%' }}
               contentFit="contain"
-              transition={300}
+              transition={500}
             />
           </View>
         ) : (
           <Image
             source={{ uri: imageUrl }}
-            className="bg-stone-100"
+            className="bg-stone-200"
             style={{ width: '100%', height: '100%', position: 'absolute' }}
             contentFit="cover"
-            transition={300}
+            transition={500}
             onError={() => setImageError(true)}
           />
         )}

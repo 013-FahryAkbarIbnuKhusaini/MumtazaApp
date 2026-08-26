@@ -427,6 +427,7 @@ export default function HomeScreen() {
         }}
         scrollEventThrottle={16}
         initialNumToRender={6}
+        maxToRenderPerBatch={6}
         windowSize={5}
         removeClippedSubviews={true}
       />
