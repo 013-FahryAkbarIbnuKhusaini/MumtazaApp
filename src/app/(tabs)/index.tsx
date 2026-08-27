@@ -46,7 +46,7 @@ const HomeHeader: React.FC = () => {
 
         <View className="flex-row items-center gap-2">
           <TouchableOpacity
-            onPress={() => console.log('Navigating to notifications')}
+            onPress={() => router.push('/notifications')}
             className="w-10 h-10 rounded-full bg-[#F1EDE7] items-center justify-center"
           >
             <Bell size={20} color="#211D18" />

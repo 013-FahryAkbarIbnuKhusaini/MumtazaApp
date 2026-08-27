@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, Animated, Dimensions, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Home, Grid3X3, History, Bell, Settings, User, X, ChevronRight, LogOut } from 'lucide-react-native';
+import { Home, History, Bell, Settings, User, X, ChevronRight, LogOut } from 'lucide-react-native';
 
 const DRAWER_WIDTH = Dimensions.get('window').width * 0.75;
 const BRAND_GOLD = '#C9A961';
@@ -148,14 +148,6 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
               <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Beranda</Text>
               <ChevronRight size={16} color="#9CA3AF" />
             </Pressable>
-            <Pressable
-              onPress={() => { console.log('Menu item pressed: Kategori Perhiasan'); animateOut(); }}
-              className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
-            >
-              <Grid3X3 size={20} color={MENU_ICON_GOLD} />
-              <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Kategori Perhiasan</Text>
-              <ChevronRight size={16} color="#9CA3AF" />
-            </Pressable>
 
             <Text className="text-xs text-gray-400 font-semibold tracking-wider px-6 pb-2 pt-6">AKUN UTAMA</Text>
             <Pressable
@@ -167,7 +159,7 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
               <ChevronRight size={16} color="#9CA3AF" />
             </Pressable>
             <Pressable
-              onPress={() => { console.log('Menu item pressed: Notifikasi'); animateOut(); }}
+              onPress={() => { animateOut(); router.push('/notifications'); }}
               className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
             >
               <Bell size={20} color={MENU_ICON_GOLD} />
