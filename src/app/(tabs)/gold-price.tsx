@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,59 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Animated, {
+  FadeInDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+
+// ---------------------------------------------------------------------------
+// ANIMATED PRESSABLE — subtle scale + opacity micro-interaction
+// ---------------------------------------------------------------------------
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function ScaleButton({
+  onPress,
+  className: cn,
+  children,
+}: {
+  onPress?: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const handlePressIn = useCallback(() => {
+    'worklet';
+    scale.value = withTiming(0.96, { duration: 120 });
+    opacity.value = withTiming(0.85, { duration: 120 });
+  }, [scale, opacity]);
+
+  const handlePressOut = useCallback(() => {
+    'worklet';
+    scale.value = withTiming(1, { duration: 180 });
+    opacity.value = withTiming(1, { duration: 180 });
+  }, [scale, opacity]);
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      className={cn}
+      style={animatedStyle}
+    >
+      {children}
+    </AnimatedPressable>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // CONSTANTS — swappable for real data later
@@ -214,20 +267,22 @@ export default function GoldPriceScreen() {
       {/* ------------------------------------------------------------------ */}
       {/* HEADER — sits outside KeyboardAvoidingView so it never shifts      */}
       {/* ------------------------------------------------------------------ */}
-      <View className="h-14 flex-row items-center justify-center px-4">
-        <Text
-          className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
-          style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
-        >
-          MUMTAZA
-        </Text>
-        <Pressable
-          onPress={() => router.push('/notifications')}
-          className="absolute right-4"
-        >
-          <Feather name="bell" size={20} color="#211D18" />
-        </Pressable>
-      </View>
+      <Animated.View entering={FadeInDown.duration(400).delay(0)}>
+        <View className="h-14 flex-row items-center justify-center px-4">
+          <Text
+            className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
+            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
+          >
+            MUMTAZA
+          </Text>
+          <ScaleButton
+            onPress={() => router.push('/notifications')}
+            className="absolute right-4"
+          >
+            <Feather name="bell" size={20} color="#211D18" />
+          </ScaleButton>
+        </View>
+      </Animated.View>
 
       {/* ------------------------------------------------------------------ */}
       {/* KEYBOARD-AVOIDING SCROLLABLE BODY                                  */}
@@ -245,172 +300,180 @@ export default function GoldPriceScreen() {
             {/* -------------------------------------------------------------- */}
             {/* SECTION 1: CURRENT PRICE HEADER                                */}
             {/* -------------------------------------------------------------- */}
-            <Text className="text-stone-500 text-sm">
-              Harga Emas Hari Ini (24K)
-            </Text>
-
-            <View className="flex-row items-baseline gap-1 mt-1">
-              <Text className="text-4xl font-bold text-[#4A3B28]">
-                {formatRupiah(PRICE_PER_GRAM)}
+            <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+              <Text className="text-stone-500 text-sm">
+                Harga Emas Hari Ini (24K)
               </Text>
-              <Text className="text-[#785928] text-sm">/ gram</Text>
-            </View>
 
-            <View className="bg-green-100 rounded-full px-2 py-0.5 self-start mt-2">
-              <Text className="text-green-700 text-xs">+1,2%</Text>
-            </View>
+              <View className="flex-row items-baseline gap-1 mt-1">
+                <Text className="text-4xl font-bold text-[#4A3B28]">
+                  {formatRupiah(PRICE_PER_GRAM)}
+                </Text>
+                <Text className="text-[#785928] text-sm">/ gram</Text>
+              </View>
 
-            <Text className="text-stone-400 text-xs mt-1">
-              Terakhir diperbarui: {currentDateTime}
-            </Text>
+              <View className="bg-green-100 rounded-full px-2 py-0.5 self-start mt-2">
+                <Text className="text-green-700 text-xs">+1,2%</Text>
+              </View>
+
+              <Text className="text-stone-400 text-xs mt-1">
+                Terakhir diperbarui: {currentDateTime}
+              </Text>
+            </Animated.View>
 
             {/* -------------------------------------------------------------- */}
             {/* SECTION 2: BUY / SELL PRICE CARDS                              */}
             {/* -------------------------------------------------------------- */}
-            <View className="flex-row gap-4 mt-6">
-              {/* Card 1 — Harga Beli */}
-              <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
-                <View className="w-9 h-9 rounded-full bg-stone-100 items-center justify-center mb-3">
-                  <Feather name="shopping-bag" size={16} color="#57534e" />
+            <Animated.View entering={FadeInDown.duration(500).delay(200)}>
+              <View className="flex-row gap-4 mt-6">
+                {/* Card 1 — Harga Beli */}
+                <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
+                  <View className="w-9 h-9 rounded-full bg-stone-100 items-center justify-center mb-3">
+                    <Feather name="shopping-bag" size={16} color="#57534e" />
+                  </View>
+                  <Text className="text-stone-500 text-xs">Harga Beli</Text>
+                  <Text className="text-base font-bold text-slate-800 mt-1">
+                    {formatRupiah(PRICE_PER_GRAM)}
+                  </Text>
                 </View>
-                <Text className="text-stone-500 text-xs">Harga Beli</Text>
-                <Text className="text-base font-bold text-slate-800 mt-1">
-                  {formatRupiah(PRICE_PER_GRAM)}
-                </Text>
-              </View>
 
-              {/* Card 2 — Harga Jual (Buyback) */}
-              <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
-                <View className="w-9 h-9 rounded-full bg-stone-100 items-center justify-center mb-3">
-                  <Feather name="tag" size={16} color="#57534e" />
+                {/* Card 2 — Harga Jual (Buyback) */}
+                <View className="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
+                  <View className="w-9 h-9 rounded-full bg-stone-100 items-center justify-center mb-3">
+                    <Feather name="tag" size={16} color="#57534e" />
+                  </View>
+                  <Text className="text-stone-500 text-xs">
+                    Harga Jual (Buyback)
+                  </Text>
+                  <Text className="text-base font-bold text-slate-800 mt-1">
+                    {formatRupiah(SELL_PRICE)}
+                  </Text>
                 </View>
-                <Text className="text-stone-500 text-xs">
-                  Harga Jual (Buyback)
-                </Text>
-                <Text className="text-base font-bold text-slate-800 mt-1">
-                  {formatRupiah(SELL_PRICE)}
-                </Text>
               </View>
-            </View>
+            </Animated.View>
 
             {/* -------------------------------------------------------------- */}
             {/* SECTION 3: PERGERAKAN NILAI EMAS — SVG CHART                   */}
             {/* -------------------------------------------------------------- */}
-            <View className="flex-row items-center justify-between mt-8 mb-4">
-              <Text className="text-lg font-bold text-slate-800">
-                Pergerakan Nilai Emas
-              </Text>
-              <View className="flex-row gap-2">
-                {RANGE_PILLS.map((pill) => {
-                  const isActive = activeRange === pill.key;
-                  return (
-                    <Pressable
-                      key={pill.key}
-                      onPress={() => setActiveRange(pill.key)}
-                      className={
-                        isActive
-                          ? 'bg-[#785928] rounded-full px-3 py-1'
-                          : 'bg-stone-100 rounded-full px-3 py-1'
-                      }
-                    >
-                      <Text
+            <Animated.View entering={FadeInDown.duration(500).delay(350)}>
+              <View className="flex-row items-center justify-between mt-8 mb-4">
+                <Text className="text-lg font-bold text-slate-800">
+                  Pergerakan Nilai Emas
+                </Text>
+                <View className="flex-row gap-2">
+                  {RANGE_PILLS.map((pill) => {
+                    const isActive = activeRange === pill.key;
+                    return (
+                      <ScaleButton
+                        key={pill.key}
+                        onPress={() => setActiveRange(pill.key)}
                         className={
                           isActive
-                            ? 'text-white text-xs'
-                            : 'text-stone-500 text-xs'
+                            ? 'bg-[#785928] rounded-full px-3 py-1'
+                            : 'bg-stone-100 rounded-full px-3 py-1'
                         }
                       >
-                        {pill.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Text
+                          className={
+                            isActive
+                              ? 'text-white text-xs'
+                              : 'text-stone-500 text-xs'
+                          }
+                        >
+                          {pill.label}
+                        </Text>
+                      </ScaleButton>
+                    );
+                  })}
+                </View>
               </View>
-            </View>
 
-            {/* Chart with Y-axis */}
-            <View className="mt-2">
-              <View className="flex-row">
-                {/* Y-axis labels */}
-                <View className="justify-between py-2" style={{ width: Y_AXIS_WIDTH, height: CHART_HEIGHT }}>
-                  {yAxisLabels.map((label, idx) => (
-                    <Text key={idx} className="text-[10px] text-stone-400">
-                      {label}
+              {/* Chart with Y-axis */}
+              <View className="mt-2">
+                <View className="flex-row">
+                  {/* Y-axis labels */}
+                  <View className="justify-between py-2" style={{ width: Y_AXIS_WIDTH, height: CHART_HEIGHT }}>
+                    {yAxisLabels.map((label, idx) => (
+                      <Text key={idx} className="text-[10px] text-stone-400">
+                        {label}
+                      </Text>
+                    ))}
+                  </View>
+
+                  {/* SVG Chart */}
+                  <View className="flex-1">
+                    <Svg
+                      width={CHART_WIDTH}
+                      height={CHART_HEIGHT}
+                      viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+                    >
+                      <Defs>
+                        <LinearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <Stop offset="0%" stopColor="#C9A961" stopOpacity={0.25} />
+                          <Stop offset="100%" stopColor="#785928" stopOpacity={0} />
+                        </LinearGradient>
+                      </Defs>
+
+                      {/* Gradient fill area */}
+                      <Path d={areaPath} fill="url(#areaGrad)" />
+
+                      {/* Gold line */}
+                      <Path
+                        d={linePath}
+                        stroke="#785928"
+                        strokeWidth={3}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </View>
+                </View>
+
+                {/* X-axis labels */}
+                <View className="flex-row justify-between mt-2" style={{ marginLeft: Y_AXIS_WIDTH }}>
+                  {chartData.map((point, idx) => (
+                    <Text key={idx} className="text-stone-400 text-xs">
+                      {point.label}
                     </Text>
                   ))}
                 </View>
-
-                {/* SVG Chart */}
-                <View className="flex-1">
-                  <Svg
-                    width={CHART_WIDTH}
-                    height={CHART_HEIGHT}
-                    viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-                  >
-                    <Defs>
-                      <LinearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0%" stopColor="#C9A961" stopOpacity={0.25} />
-                        <Stop offset="100%" stopColor="#785928" stopOpacity={0} />
-                      </LinearGradient>
-                    </Defs>
-
-                    {/* Gradient fill area */}
-                    <Path d={areaPath} fill="url(#areaGrad)" />
-
-                    {/* Gold line */}
-                    <Path
-                      d={linePath}
-                      stroke="#785928"
-                      strokeWidth={3}
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </View>
               </View>
-
-              {/* X-axis labels */}
-              <View className="flex-row justify-between mt-2" style={{ marginLeft: Y_AXIS_WIDTH }}>
-                {chartData.map((point, idx) => (
-                  <Text key={idx} className="text-stone-400 text-xs">
-                    {point.label}
-                  </Text>
-                ))}
-              </View>
-            </View>
+            </Animated.View>
 
             {/* -------------------------------------------------------------- */}
             {/* SECTION 4: KALKULATOR INVESTASI                                */}
             {/* -------------------------------------------------------------- */}
-            <Text className="text-lg font-bold text-slate-800 mt-8 mb-4">
-              Kalkulator Investasi
-            </Text>
+            <Animated.View entering={FadeInDown.duration(500).delay(500)}>
+              <Text className="text-lg font-bold text-slate-800 mt-8 mb-4">
+                Kalkulator Investasi
+              </Text>
 
-            <View className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
-              {/* Input Row */}
-              <View className="flex-row items-center justify-between border border-stone-200 rounded-xl px-4 py-3">
-                <TextInput
-                  className="text-base font-semibold text-slate-800 flex-1"
-                  keyboardType="numeric"
-                  value={gramAmount}
-                  onChangeText={setGramAmount}
-                  placeholder="0"
-                  placeholderTextColor="#a8a29e"
-                />
-                <Text className="text-stone-400 text-sm">Gram</Text>
-              </View>
+              <View className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+                {/* Input Row */}
+                <View className="flex-row items-center justify-between border border-stone-200 rounded-xl px-4 py-3">
+                  <TextInput
+                    className="text-base font-semibold text-slate-800 flex-1"
+                    keyboardType="numeric"
+                    value={gramAmount}
+                    onChangeText={setGramAmount}
+                    placeholder="0"
+                    placeholderTextColor="#a8a29e"
+                  />
+                  <Text className="text-stone-400 text-sm">Gram</Text>
+                </View>
 
-              {/* Result Row */}
-              <View className="mt-4">
-                <Text className="text-stone-500 text-sm mb-1">
-                  Total Estimasi
-                </Text>
-                <Text className="text-xl font-bold text-[#785928]">
-                  {formatRupiah(estimatedPrice)}
-                </Text>
+                {/* Result Row */}
+                <View className="mt-4">
+                  <Text className="text-stone-500 text-sm mb-1">
+                    Total Estimasi
+                  </Text>
+                  <Text className="text-xl font-bold text-[#785928]">
+                    {formatRupiah(estimatedPrice)}
+                  </Text>
+                </View>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

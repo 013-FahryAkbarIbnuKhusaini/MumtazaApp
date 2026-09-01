@@ -18,7 +18,7 @@ import SidebarMenu from '../../components/layout/SidebarMenu';
 const USER_DATA = {
   name: 'Lianel Zaneti Malik Ibrahim',
   email: 'leonelmesi17@gmail.com',
-  membership: 'Gold Member',
+  membership: 'Silver Member',
 };
 
 interface MenuItem {
@@ -44,22 +44,11 @@ export default function ProfileScreen() {
       onPress: () => router.push('/(main)/points' as any),
     },
     {
-      id: 'addresses',
-      label: 'Saved Addresses',
-      iconFamily: 'Feather',
-      iconName: 'map-pin',
-    },
-    {
-      id: 'payment',
-      label: 'Payment Methods',
-      iconFamily: 'Feather',
-      iconName: 'credit-card',
-    },
-    {
       id: 'help',
       label: 'Help Center',
       iconFamily: 'Feather',
       iconName: 'help-circle',
+      onPress: () => router.push('/help-center' as any),
     },
     {
       id: 'logout',
@@ -121,7 +110,10 @@ export default function ProfileScreen() {
             <View className="w-24 h-24 rounded-full bg-[#E5E0D8] items-center justify-center">
               <Ionicons name="person-outline" size={42} color="#6B5938" />
             </View>
-            <TouchableOpacity className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#524128] items-center justify-center border-2 border-white">
+            <TouchableOpacity
+              onPress={() => router.push('/edit-profile' as any)} // TODO: confirm this route exists — no matching screen found under src/app/ at time of edit
+              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#524128] items-center justify-center border-2 border-white"
+            >
               <Feather name="edit-2" size={12} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
@@ -134,7 +126,7 @@ export default function ProfileScreen() {
             {USER_DATA.email}
           </Text>
 
-          {/* Gold Member Badge */}
+          {/* Membership Badge */}
           <View className="flex-row items-center bg-[#F4EFEB] px-3.5 py-1.5 rounded-full border border-[#E5DDD2]">
             <Ionicons name="ribbon-outline" size={15} color="#8C6E3D" />
             <Text className="ml-1.5 text-xs font-semibold text-[#8C6E3D]">
@@ -146,7 +138,7 @@ export default function ProfileScreen() {
         {/* Quick Actions (My Orders & Wishlist) */}
         <View className="flex-row gap-x-4 px-5 mb-6">
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={() => router.push('/orders' as any)} // TODO: confirm this route exists — no matching screen found under src/app/ at time of edit
             className="flex-1 bg-white rounded-2xl p-5 items-center justify-center shadow-sm border border-[#F0ECE6]"
           >
             <View className="w-12 h-12 rounded-full bg-[#F4EFEB] items-center justify-center mb-3">
@@ -156,7 +148,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={() => router.push('/wishlist' as any)} // TODO: confirm this route exists — no matching screen found under src/app/ at time of edit
             className="flex-1 bg-white rounded-2xl p-5 items-center justify-center shadow-sm border border-[#F0ECE6]"
           >
             <View className="w-12 h-12 rounded-full bg-[#F4EFEB] items-center justify-center mb-3">

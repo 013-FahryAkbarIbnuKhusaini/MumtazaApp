@@ -11,7 +11,6 @@ import {
   Pressable,
   Animated,
   ActivityIndicator,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -20,6 +19,11 @@ import { ProductCard } from '../../components/product/ProductCard';
 import SidebarMenu from '../../components/layout/SidebarMenu';
 import { Product, ProductApi } from '../../types';
 
+// IMPORTANT: If testing on a physical device, 'localhost' will NOT work — 
+// it points to the phone itself, not your dev machine. Replace the base URL below 
+// with your machine's local network IP (e.g. http://192.168.1.42:3000/api/products), 
+// found via `ipconfig` (Windows) or `ifconfig`/`ipconfig getifaddr en0` (Mac). 
+// Ensure your phone and dev machine are on the same Wi-Fi network.
 const API_BASE_URL = 'https://emas.tokomumtaza.com';
 
 const HomeHeader: React.FC = () => {
@@ -231,65 +235,67 @@ const CategoryPills: React.FC<CategoryPillsProps> = ({
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
   const [likedIds, setLikedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Piece');
-  const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const flatListRef = useRef<FlatList<Product>>(null);
 
   const fetchProducts = async (pageNum: number) => {
+    setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/mutasi?page=${pageNum}`);
+      const response = await fetch(`${API_BASE_URL}/api/mutasi?page=${pageNum}&limit=10`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const apiProducts: ProductApi[] = data.data.data;
-      const totalPages: number = data.data.last_page;
+      const apiProducts: ProductApi[] = data?.data?.data || [];
+      const totalPages: number = data?.data?.last_page || 1;
 
       const mappedProducts: Product[] = apiProducts.map((p) => ({
-        id: p.id.toString(),
-        name: p.name,
-        code: p.code,
-        category: p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase(),
-        image: p.image,
-        karat: p.karat,
-        berat: p.berat,
-        status: p.status,
+        id: p.id ? p.id.toString() : Math.random().toString(),
+        name: p.name || 'Nama produk tidak tersedia',
+        code: p.code || '',
+        category: p.name ? (p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase()) : 'Lainnya',
+        image: p.image || '',
+        karat: p.karat || '',
+        berat: p.berat || '',
+        status: p.status || '',
         isBestSeller: p.type_id === 1 || p.type_id === 2,
         isNew: p.status === 'ADA',
       }));
 
-      setProducts((prev) => (pageNum === 1 ? mappedProducts : [...prev, ...mappedProducts]));
-      setLastPage(totalPages);
+      if (pageNum === 1) {
+        setProducts(mappedProducts);
+      } else {
+        setProducts((prev) => [...prev, ...mappedProducts]);
+      }
+
+      if (mappedProducts.length < 10 || pageNum >= totalPages) {
+        setHasMore(false);
+      }
     } catch (e) {
       console.error('Failed to fetch products:', e);
-      if (pageNum === 1) {
-        setProducts([]);
-      }
     } finally {
       setIsLoading(false);
-      setIsFetchingMore(false);
     }
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    setPage(1);
     fetchProducts(1);
-  }, [selectedCategory]);
+  }, []);
 
-  useEffect(() => {
-    if (page > 1) {
-      setIsFetchingMore(true);
-      fetchProducts(page);
+  const loadMore = () => {
+    if (!isLoading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchProducts(nextPage);
     }
-  }, [page]);
+  };
 
   const toggleLike = useCallback((id: string) => {
     setLikedIds((prev) => {
@@ -300,19 +306,8 @@ export default function HomeScreen() {
     });
   }, []);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    setPage(1);
-    setIsFetchingMore(false);
-    try {
-      await fetchProducts(1);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   const filteredResults = useMemo(() => {
-    let filtered = products;
+    let filtered: Product[] = products;
     if (selectedCategory !== 'All Piece') {
       filtered = filtered.filter((item) =>
         item.category.toLowerCase().includes(selectedCategory.toLowerCase())
@@ -332,12 +327,6 @@ export default function HomeScreen() {
   // First product renders as a large card in the header; rest go into the 2-column FlatList grid
   const firstProduct = filteredResults.length > 0 ? filteredResults[0] : null;
   const gridProducts = useMemo(() => filteredResults.slice(1), [filteredResults]);
-
-  const handleEndReached = useCallback(() => {
-    if (!isFetchingMore && !isLoading && page < lastPage) {
-      setPage((prev) => prev + 1);
-    }
-  }, [isFetchingMore, isLoading, page, lastPage]);
 
   const renderGridItem = useCallback(({ item, index }: { item: Product; index: number }) => {
     const isLiked = likedIds.includes(item.id);
@@ -365,7 +354,7 @@ export default function HomeScreen() {
         activeCategory={selectedCategory}
         onSelect={setSelectedCategory}
       />
-      {isLoading ? (
+      {isLoading && page === 1 && products.length === 0 ? (
         <View className="items-center mt-12">
           <ActivityIndicator size="large" color="#C9A961" />
           <Text className="text-textSecondary mt-3 font-body">Loading products...</Text>
@@ -388,16 +377,7 @@ export default function HomeScreen() {
         </View>
       )}
     </>
-  ), [searchQuery, selectedCategory, isLoading, filteredResults, firstProduct, likedIds, toggleLike]);
-
-  const ListFooter = useMemo(() => {
-    if (!isFetchingMore) return null;
-    return (
-      <View className="py-5 items-center">
-        <ActivityIndicator size="large" color="#C9A961" />
-      </View>
-    );
-  }, [isFetchingMore]);
+  ), [searchQuery, selectedCategory, filteredResults, firstProduct, likedIds, toggleLike, isLoading, page, products.length]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -409,19 +389,17 @@ export default function HomeScreen() {
         keyExtractor={keyExtractor}
         numColumns={2}
         ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
+        ListFooterComponent={
+          isLoading && page > 1 ? (
+            <View className="py-5 items-center">
+              <ActivityIndicator size="large" color="#C9A961" />
+            </View>
+          ) : null
+        }
         contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
-        onEndReached={handleEndReached}
+        onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#C9A961"
-            colors={['#C9A961']}
-          />
-        }
         onScroll={({ nativeEvent }) => {
           setShowScrollTop(nativeEvent.contentOffset.y > 500);
         }}

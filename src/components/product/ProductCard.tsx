@@ -16,6 +16,7 @@ interface ProductCardProps {
 }
 
 function titleCase(str: string): string {
+  if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
@@ -36,7 +37,9 @@ export const ProductCard = ({
 
   const isLarge = product.size === 'large';
 
-  const displayName = `${titleCase(product.name)} - ${product.code}`;
+  const namePart = product.name ? titleCase(product.name) : 'Nama produk tidak tersedia';
+  const codePart = product.code || '';
+  const displayName = codePart ? `${namePart} - ${codePart}` : namePart;
   const displaySubtitle = `${product.karat} Gold • ${product.berat}g`;
 
   // Proactive URL validity check: treat missing, empty, and whitespace-only as "no image"
