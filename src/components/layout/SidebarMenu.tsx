@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, Animated, Dimensions, Modal, Alert } from 'react-native';
+import { View, Text, Pressable, Animated, Dimensions, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Home, History, Bell, Settings, User, X, ChevronRight, LogOut } from 'lucide-react-native';
+import { Home, Bell, User, X, LogOut } from 'lucide-react-native';
+import { useAuthStore } from '../../store/authStore';
 
 const DRAWER_WIDTH = Dimensions.get('window').width * 0.75;
 const BRAND_GOLD = '#C9A961';
@@ -15,6 +16,7 @@ interface SidebarMenuProps {
 
 export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
   const [mounted, setMounted] = useState(false);
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const isMountedRef = useRef(false);
@@ -75,29 +77,18 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
   }, [visible]);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Konfirmasi Logout',
-      'Apakah Anda yakin ingin keluar dari akun ini?',
-      [
-        {
-          text: 'Batal',
-          style: 'cancel',
-          onPress: () => {},
-        },
-        {
-          text: 'Keluar',
-          style: 'destructive',
-          onPress: () => {
-            // TODO: clear auth token/session once auth state management is implemented
-            router.replace('/login');
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = () => {
+    setLogoutModalVisible(false);
+    animateOut();
+    useAuthStore.getState().logout();
+    router.replace('/(auth)/login');
   };
 
   return (
+    <>
     <Modal transparent animationType="none" visible={mounted} onRequestClose={animateOut}>
       <View className="flex-row flex-1">
         <Animated.View
@@ -141,38 +132,23 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
 
             <Text className="text-xs text-gray-400 font-semibold tracking-wider px-6 pb-2 pt-6">EKSPLORASI</Text>
             <Pressable
-              onPress={() => { console.log('Menu item pressed: Beranda'); animateOut(); }}
+              onPress={() => {
+                animateOut();
+                router.replace('/(tabs)');
+              }}
               className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
             >
               <Home size={20} color={MENU_ICON_GOLD} />
               <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Beranda</Text>
-              <ChevronRight size={16} color="#9CA3AF" />
             </Pressable>
 
             <Text className="text-xs text-gray-400 font-semibold tracking-wider px-6 pb-2 pt-6">AKUN UTAMA</Text>
-            <Pressable
-              onPress={() => { console.log('Menu item pressed: Riwayat Transaksi'); animateOut(); }}
-              className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
-            >
-              <History size={20} color={MENU_ICON_GOLD} />
-              <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Riwayat Transaksi</Text>
-              <ChevronRight size={16} color="#9CA3AF" />
-            </Pressable>
             <Pressable
               onPress={() => { animateOut(); router.push('/notifications'); }}
               className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
             >
               <Bell size={20} color={MENU_ICON_GOLD} />
               <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Notifikasi</Text>
-              <ChevronRight size={16} color="#9CA3AF" />
-            </Pressable>
-            <Pressable
-              onPress={() => { console.log('Menu item pressed: Pengaturan'); animateOut(); }}
-              className="flex-row items-center px-6 py-3.5 active:bg-gray-100"
-            >
-              <Settings size={20} color={MENU_ICON_GOLD} />
-              <Text className="flex-1 ml-4 text-[15px] font-semibold text-gray-800">Pengaturan</Text>
-              <ChevronRight size={16} color="#9CA3AF" />
             </Pressable>
 
             <View className="mt-auto px-6 pb-6 pt-4">
@@ -181,7 +157,7 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
                 className="flex-row items-center py-2"
               >
                 <LogOut size={20} color="#F87171" />
-                <Text className="ml-4 text-[15px] font-semibold text-red-400">Keluar</Text>
+                <Text className="ml-4 text-[15px] font-semibold text-red-400">Logout</Text>
               </Pressable>
               <Text className="text-[10px] text-gray-300 text-center mt-5">MUMTAZA v1.0.0</Text>
             </View>
@@ -189,5 +165,44 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
         </Animated.View>
       </View>
     </Modal>
+
+    {/* Logout Confirmation Modal — identical to Profile screen's modal */}
+    <Modal transparent={true} visible={isLogoutModalVisible} animationType="fade">
+      <View className="flex-1 justify-center items-center bg-black/40 px-6">
+        <View className="w-full bg-white rounded-[24px] p-6 items-center shadow-lg">
+
+          {/* Icon Circle */}
+          <View className="w-14 h-14 rounded-full bg-stone-50 justify-center items-center mb-4">
+            <LogOut size={24} color="#785928" />
+          </View>
+
+          {/* Title & Subtitle */}
+          <Text className="text-lg font-bold text-slate-800 mb-2">Sign Out</Text>
+          <Text className="text-sm text-stone-500 text-center mb-6">
+            Are you sure you want to log out of your account?
+          </Text>
+
+          {/* Button Row */}
+          <View className="flex-row w-full gap-3">
+            {/* Cancel Button */}
+            <Pressable
+              className="flex-1 py-3.5 rounded-full bg-stone-100 items-center"
+              onPress={() => setLogoutModalVisible(false)}
+            >
+              <Text className="text-sm font-bold text-stone-500">Cancel</Text>
+            </Pressable>
+
+            {/* Confirm Logout Button */}
+            <Pressable
+              className="flex-1 py-3.5 rounded-full bg-[#785928] items-center"
+              onPress={confirmLogout}
+            >
+              <Text className="text-sm font-bold text-white">Sign Out</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }

@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SidebarMenu from '../../components/layout/SidebarMenu';
+import { useAuthStore } from '../../store/authStore';
 
 // Static local mock constants for user profile
 const USER_DATA = {
@@ -84,10 +84,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <View className="absolute left-0 right-0 items-center justify-center" pointerEvents="none">
-          <Text
-            className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
-            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
-          >
+          <Text className="font-serif text-4xl tracking-[0.2em] text-[#211D18]">
             MUMTAZA
           </Text>
         </View>
@@ -148,7 +145,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => router.push('/wishlist' as any)} // TODO: confirm this route exists — no matching screen found under src/app/ at time of edit
+            onPress={() => router.push('/(main)/wishlist' as any)}
             className="flex-1 bg-white rounded-2xl p-5 items-center justify-center shadow-sm border border-[#F0ECE6]"
           >
             <View className="w-12 h-12 rounded-full bg-[#F4EFEB] items-center justify-center mb-3">
@@ -237,6 +234,7 @@ export default function ProfileScreen() {
                 className="flex-1 py-3.5 rounded-full bg-[#785928] items-center"
                 onPress={() => {
                   setLogoutModalVisible(false);
+                  useAuthStore.getState().logout();
                   router.replace('/(auth)/login');
                 }}
               >

@@ -117,7 +117,7 @@ export default function ProductDetailScreen() {
 
           <View className={`self-start px-3 py-1 rounded-full mt-2 ${isAvailable ? 'bg-green-100' : 'bg-red-100'}`}>
             <Text className={`text-xs font-bold ${isAvailable ? 'text-green-700' : 'text-red-700'}`}>
-              {product.status}
+              {isAvailable ? 'Tersedia' : product.status}
             </Text>
           </View>
 

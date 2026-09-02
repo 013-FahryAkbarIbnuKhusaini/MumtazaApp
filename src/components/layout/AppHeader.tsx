@@ -34,7 +34,7 @@ export const AppHeader = ({
       <TouchableOpacity onPress={onBackPress}>
         {variant === 'title' ? <ChevronLeft size={24} color="#1A1C1C" /> : <Menu size={24} color="#1A1C1C" />}
       </TouchableOpacity>
-      <Text className="font-heading text-lg">{title}</Text>
+      <Text className="font-serif text-4xl tracking-[0.2em] text-[#1A1C1C]">{title}</Text>
       <TouchableOpacity onPress={onRightPress}>
         <RightIcon size={24} color="#1A1C1C" />
         {showNotificationDot && <View className="absolute top-0 right-0 w-2.5 h-2.5 bg-danger rounded-full" />}

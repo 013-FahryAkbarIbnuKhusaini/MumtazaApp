@@ -1,15 +1,18 @@
-import React, { useCallback } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
-import { Image } from 'expo-image';
 import Animated, {
   FadeInDown,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import ProductCard from '../../components/product/ProductCard';
+import { Product, ProductApi } from '../../types';
+
+const API_BASE_URL = 'https://emas.tokomumtaza.com';
 
 // -----------------------------------------------------------------------------
 // ANIMATED PRESSABLE — subtle scale + opacity micro-interaction
@@ -59,30 +62,52 @@ function ScaleButton({
 }
 
 // -----------------------------------------------------------------------------
-// MOCK RECOMMENDATION DATA
-// -----------------------------------------------------------------------------
-const RECOMMENDATIONS = [
-  {
-    id: '1',
-    name: 'Nusantara Crown Ring',
-    price: 'Rp 12.500.000',
-    image:
-      'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&auto=format&fit=crop&q=80',
-  },
-  {
-    id: '2',
-    name: 'Batik Weave Band',
-    price: 'Rp 8.250.000',
-    image:
-      'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=400&auto=format&fit=crop&q=80',
-  },
-];
-
-// -----------------------------------------------------------------------------
 // CART SCREEN — EMPTY STATE
 // -----------------------------------------------------------------------------
 export default function CartScreen() {
   const router = useRouter();
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const [isLoadingRecs, setIsLoadingRecs] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      setIsLoadingRecs(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/mutasi?page=1&limit=20`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const apiProducts: ProductApi[] = data?.data?.data || [];
+
+        const mappedProducts: Product[] = apiProducts.map((p) => ({
+          id: p.id ? p.id.toString() : Math.random().toString(),
+          name: p.name || 'Nama produk tidak tersedia',
+          code: p.code || '',
+          category: p.name ? (p.name.charAt(0).toUpperCase() + p.name.slice(1).toLowerCase()) : 'Lainnya',
+          image: p.image || '',
+          karat: p.karat || '',
+          berat: p.berat || '',
+          status: p.status || '',
+          isBestSeller: p.type_id === 1 || p.type_id === 2,
+          isNew: p.status === 'ADA',
+        }));
+
+        const filteredData = mappedProducts.filter(
+          (item) => item.image && item.image.trim() !== ''
+        );
+        const topFour = filteredData.slice(0, 4);
+        setRecommendations(topFour);
+      } catch (error) {
+        console.error('Failed to fetch recommendations:', error);
+        setRecommendations([]);
+      } finally {
+        setIsLoadingRecs(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-[#FAFAFA]" edges={['top']}>
@@ -129,13 +154,6 @@ export default function CartScreen() {
               <Feather name="arrow-right" size={18} color="#FFFFFF" />
             </ScaleButton>
           </Animated.View>
-
-          {/* Secondary Button — Lanjut Belanja */}
-          <Animated.View entering={FadeInDown.duration(500).delay(400)}>
-            <ScaleButton onPress={() => router.back()} className="mt-6">
-              <Text className="text-[#785928] font-semibold">Lanjut Belanja</Text>
-            </ScaleButton>
-          </Animated.View>
         </View>
 
         {/* ----------------------------------------------------------------- */}
@@ -148,41 +166,39 @@ export default function CartScreen() {
         {/* ----------------------------------------------------------------- */}
         {/* 3. RECOMMENDATION SECTION — "Mungkin Anda Suka"                   */}
         {/* ----------------------------------------------------------------- */}
-        <Animated.View entering={FadeInDown.duration(500).delay(600)}>
-          <Text className="text-xl font-bold text-slate-800 mb-6 px-4">
-            Mungkin Anda Suka
-          </Text>
-        </Animated.View>
-
-        <View className="flex-row flex-wrap justify-between px-4">
-          {RECOMMENDATIONS.map((product, index) => (
-            <Animated.View
-              key={product.id}
-              entering={FadeInDown.duration(500).delay(700 + index * 120)}
-              className="w-[48%] mb-6"
-            >
-              {/* Image */}
-              <View className="w-full aspect-[4/5] bg-stone-100 rounded-xl overflow-hidden mb-3">
-                <Image
-                  source={{ uri: product.image }}
-                  className="w-full h-full"
-                  contentFit="cover"
-                  transition={300}
-                />
-              </View>
-
-              {/* Product Name */}
-              <Text className="text-sm font-medium text-slate-800">
-                {product.name}
-              </Text>
-
-              {/* Price */}
-              <Text className="text-xs font-semibold text-[#785928] mt-1">
-                {product.price}
+        {isLoadingRecs ? (
+          <ActivityIndicator size="small" color="#785928" className="my-8" />
+        ) : recommendations.length > 0 ? (
+          <>
+            <Animated.View entering={FadeInDown.duration(500).delay(600)}>
+              <Text className="text-xl font-bold text-slate-800 mb-6 px-4">
+                Mungkin Anda Suka
               </Text>
             </Animated.View>
-          ))}
-        </View>
+
+            <View className="flex-row flex-wrap justify-between px-4">
+              {recommendations.map((product, index) => (
+                <Animated.View
+                  key={product.id}
+                  entering={FadeInDown.duration(500).delay(700 + index * 120)}
+                  className="w-[48%]"
+                >
+                  <ProductCard product={product} />
+                </Animated.View>
+              ))}
+            </View>
+
+            {/* "Lihat Koleksi Lengkap ➔" Button */}
+            <Pressable
+              onPress={() => router.push('/(tabs)')}
+              className="mt-6 mb-8"
+            >
+              <Text className="text-sm font-bold text-[#785928] text-center">
+                Lihat Koleksi Lengkap ➔
+              </Text>
+            </Pressable>
+          </>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

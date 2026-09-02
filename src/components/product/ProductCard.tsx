@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withSpring,
+} from 'react-native-reanimated';
 import { Product } from '../../types';
+import { useWishlistStore } from '../../store/wishlistStore';
 
 const GOLD_BASE_PRICE_PER_GRAM = 1350000;
 const FALLBACK_LOGO = require('../../../assets/images/logo-mumtaza-hd.png');
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 interface ProductCardProps {
   product: Product;
-  isLiked: boolean;
   onPress?: () => void;
-  onPressHeart: () => void;
 }
 
 function titleCase(str: string): string {
@@ -20,12 +28,47 @@ function titleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-export const ProductCard = ({
-  product,
-  isLiked,
-  onPress,
-  onPressHeart,
-}: ProductCardProps) => {
+/**
+ * WishlistHeart — subscribes to only its own item's wishlist boolean via a
+ * scoped Zustand selector, so toggling one card never re-renders another.
+ */
+const WishlistHeart = React.memo(function WishlistHeart({ product }: { product: Product }) {
+  const isLiked = useWishlistStore(
+    (state) => state.wishlistItems.some((i) => i.id === product.id),
+  );
+  const toggleWishlistItem = useWishlistStore((state) => state.toggleWishlistItem);
+
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePress = useCallback(() => {
+    scale.value = withSequence(
+      withTiming(0.8, { duration: 100 }),
+      withSpring(1, { damping: 6, stiffness: 200 }),
+    );
+    toggleWishlistItem(product);
+  }, [product, toggleWishlistItem, scale]);
+
+  return (
+    <AnimatedPressable
+      className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm"
+      onPress={handlePress}
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      style={animatedStyle}
+    >
+      <Heart
+        size={16}
+        color="#785928"
+        fill={isLiked ? '#785928' : 'transparent'}
+      />
+    </AnimatedPressable>
+  );
+});
+
+const ProductCardInner = ({ product, onPress }: ProductCardProps) => {
   const router = useRouter();
 
   const handleCardPress = () => {
@@ -94,9 +137,7 @@ export const ProductCard = ({
             <Text className="text-[10px] font-bold tracking-wide ${product.badge === 'BEST SELLER' ? 'text-white' : 'text-black'}">{product.badge}</Text>
           </View>
         )}
-        <Pressable className="absolute bottom-3 right-3 bg-white rounded-full p-2 shadow-sm" onPress={(e) => { e.stopPropagation(); onPressHeart(); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Heart size={16} color={isLiked ? '#785928' : '#785928'} fill={isLiked ? '#785928' : 'transparent'} />
-        </Pressable>
+        <WishlistHeart product={product} />
       </View>
       <View className="p-3">
         {isLarge ? (
@@ -117,5 +158,7 @@ export const ProductCard = ({
     </Pressable>
   );
 };
+
+export const ProductCard = React.memo(ProductCardInner);
 
 export default ProductCard;

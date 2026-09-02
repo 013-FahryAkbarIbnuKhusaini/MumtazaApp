@@ -43,9 +43,7 @@ export default function Sandbox() {
             berat: '2.42',
             status: 'ADA',
           }}
-          isLiked={false}
           onPress={() => {}}
-          onPressHeart={() => {}}
         />
 
         <QuantityStepper quantity={1} onIncrease={() => {}} onDecrease={() => {}} />

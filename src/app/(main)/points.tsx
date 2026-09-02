@@ -13,12 +13,73 @@ interface TierInfo {
   maxPoints: number | null;
 }
 
+interface TierCardStyle {
+  gradientColors: string[] | null;
+  solidBg: string;
+  textColor: string;
+  subtextColor: string;
+  iconColor: string;
+  borderColor: string;
+  dividerColor: string;
+}
+
 const TIER_SCHEMA: TierInfo[] = [
   { name: 'Silver', minPoints: 0, maxPoints: 999 },
   { name: 'Gold', minPoints: 1000, maxPoints: 4999 },
   { name: 'Platinum', minPoints: 5000, maxPoints: 9999 },
   { name: 'Signature', minPoints: 10000, maxPoints: null },
 ];
+
+function getCardStyle(rawTierName?: string | null): TierCardStyle {
+  const normalized = (rawTierName || '').toLowerCase().trim();
+
+  if (normalized.includes('gold')) {
+    return {
+      gradientColors: ['#FEF08A', '#FBBF24', '#D97706'],
+      solidBg: '#FBBF24',
+      textColor: '#0F172A',
+      subtextColor: '#78350F',
+      iconColor: '#0F172A',
+      borderColor: '#F59E0B',
+      dividerColor: 'rgba(120, 53, 15, 0.25)',
+    };
+  }
+
+  if (normalized.includes('platinum')) {
+    return {
+      gradientColors: ['#BAE6FD', '#60A5FA', '#4F46E5'],
+      solidBg: '#1E40AF',
+      textColor: '#FFFFFF',
+      subtextColor: '#93C5FD',
+      iconColor: '#FFFFFF',
+      borderColor: '#3B82F6',
+      dividerColor: 'rgba(255, 255, 255, 0.25)',
+    };
+  }
+
+  if (normalized.includes('signature')) {
+    return {
+      gradientColors: ['#0F172A', '#172554', '#000000'],
+      solidBg: '#0F172A',
+      textColor: '#FBBF24',
+      subtextColor: '#FCD34D',
+      iconColor: '#FBBF24',
+      borderColor: '#334155',
+      dividerColor: 'rgba(251, 191, 36, 0.25)',
+    };
+  }
+
+  // Silver / Default
+  return {
+    gradientColors: ['#E2E8F0', '#CBD5E1', '#94A3B8'],
+    solidBg: '#E2E8F0',
+    textColor: '#0F172A',
+    subtextColor: '#475569',
+    iconColor: '#0F172A',
+    borderColor: '#CBD5E1',
+    dividerColor: 'rgba(71, 85, 105, 0.25)',
+  };
+}
 
 function getTierDetails(points: number) {
   const currentTier =
@@ -80,6 +141,7 @@ export default function PointsScreen() {
   });
 
   const tierDetails = getTierDetails(availableCoins);
+  const cardStyle = getCardStyle(tierDetails.rawTierName);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -104,9 +166,7 @@ export default function PointsScreen() {
           </Text>
         </View>
 
-        <View className="w-9 h-9 rounded-full items-center justify-center">
-          <Feather name="award" size={20} color="#785928" />
-        </View>
+        <View className="w-9 h-9" />
       </View>
 
       <View className="border-b border-stone-100" />
@@ -120,44 +180,65 @@ export default function PointsScreen() {
       >
         <View className="px-6 pb-8">
           {/* ------------------------------------------------------------------- */}
-          {/* 2. THE VIP HERO CARD — "SILVER VISA" AESTHETIC */}
+          {/* 2. THE VIP HERO CARD — DYNAMIC TIER AESTHETIC */}
           {/* ------------------------------------------------------------------- */}
-          <View className="relative overflow-hidden rounded-2xl border border-slate-300/80 shadow-md mt-4 p-5 bg-slate-200">
+          <View
+            className="relative overflow-hidden rounded-2xl border shadow-md mt-4 p-5"
+            style={{ backgroundColor: cardStyle.solidBg, borderColor: cardStyle.borderColor }}
+          >
             {/* Glare Texture (absolute, behind content) */}
-            <View className="absolute -rotate-45 -left-4 top-0 h-full w-16 bg-white/40" />
+            <View className="absolute -rotate-45 -left-4 top-0 h-full w-16 bg-white/20" />
 
             {/* Content Container */}
             <View>
               {/* Row 1 */}
               <View className="flex-row items-start justify-between">
-                <Text className="text-[10px] uppercase tracking-widest font-bold text-stone-400">
+                <Text
+                  className="text-[10px] uppercase tracking-widest font-bold"
+                  style={{ color: cardStyle.subtextColor }}
+                >
                   MUMTAZA REWARDS
                 </Text>
                 <TouchableOpacity onPress={handleRefresh} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                    <Feather name="refresh-cw" size={18} color="#785928" />
+                    <Feather name="refresh-cw" size={18} color={cardStyle.iconColor} />
                   </Animated.View>
                 </TouchableOpacity>
               </View>
 
               {/* Row 2 */}
               <View className="mt-3">
-                <Text className="text-slate-900 text-5xl font-light">
+                <Text
+                  className="text-5xl font-light"
+                  style={{ color: cardStyle.textColor }}
+                >
                   {availableCoins.toLocaleString('en-US')}
                 </Text>
-                <Text className="text-[10px] uppercase tracking-widest font-bold text-stone-400 mt-1">
+                <Text
+                  className="text-[10px] uppercase tracking-widest font-bold mt-1"
+                  style={{ color: cardStyle.subtextColor }}
+                >
                   AVAILABLE COINS
                 </Text>
               </View>
 
               {/* Divider */}
-              <View className="mt-4 border-t border-slate-400/30 pt-3">
+              <View
+                className="mt-4 pt-3 border-t"
+                style={{ borderTopColor: cardStyle.dividerColor }}
+              >
                 {/* Row 3 */}
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-slate-800 text-sm font-medium">
+                  <Text
+                    className="text-sm font-medium"
+                    style={{ color: cardStyle.textColor }}
+                  >
                     {tierDetails.tierName}
                   </Text>
-                  <Text className="text-slate-500 text-sm">
+                  <Text
+                    className="text-sm"
+                    style={{ color: cardStyle.subtextColor }}
+                  >
                     {tierDetails.progressText}
                   </Text>
                 </View>

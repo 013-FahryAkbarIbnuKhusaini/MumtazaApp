@@ -108,10 +108,8 @@ const FAQ_DATA: FaqItem[] = [
 // WHATSAPP HANDLER
 // ---------------------------------------------------------------------------
 async function handleWhatsAppPress() {
-  // TODO: Replace the dummy number below with MUMTAZA's real WhatsApp Business number before shipping to production.
-  // Format: country code + number, no leading zero or plus sign (e.g. 62 for Indonesia).
   const url =
-    'https://wa.me/6281234567890?text=Halo%20MUMTAZA,%20saya%20butuh%20bantuan%20terkait%20layanan%20Anda.';
+    'https://wa.me/6281214175087?text=Halo%20Dinar%20Emas%20MUMTAZA,%20saya%20butuh%20bantuan%20terkait%20layanan%20Anda.';
   try {
     await Linking.openURL(url);
   } catch (error) {

@@ -11,6 +11,7 @@ interface AuthState {
   error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (fullName: string, phone: string, email: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -47,5 +48,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     set({ user: { name: fullName, email }, isLoading: false });
     return true;
+  },
+  logout: () => {
+    set({ user: null, isLoading: false, error: null });
   },
 }));

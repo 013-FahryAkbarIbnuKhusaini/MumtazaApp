@@ -269,10 +269,7 @@ export default function GoldPriceScreen() {
       {/* ------------------------------------------------------------------ */}
       <Animated.View entering={FadeInDown.duration(400).delay(0)}>
         <View className="h-14 flex-row items-center justify-center px-4">
-          <Text
-            className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
-            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
-          >
+          <Text className="font-serif text-4xl tracking-[0.2em] text-[#211D18]">
             MUMTAZA
           </Text>
           <ScaleButton

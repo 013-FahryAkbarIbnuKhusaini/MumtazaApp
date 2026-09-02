@@ -40,10 +40,7 @@ const HomeHeader: React.FC = () => {
         </TouchableOpacity>
 
         <View className="absolute left-0 right-0 items-center justify-center" pointerEvents="none">
-          <Text
-            className="text-lg font-bold uppercase tracking-widest text-[#211D18]"
-            style={{ fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', default: undefined }) }}
-          >
+          <Text className="font-serif text-4xl tracking-[0.2em] text-[#211D18]">
             MUMTAZA
           </Text>
         </View>
@@ -239,7 +236,6 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const [likedIds, setLikedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Piece');
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -297,15 +293,6 @@ export default function HomeScreen() {
     }
   };
 
-  const toggleLike = useCallback((id: string) => {
-    setLikedIds((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((likedId) => likedId !== id);
-      }
-      return [...prev, id];
-    });
-  }, []);
-
   const filteredResults = useMemo(() => {
     let filtered: Product[] = products;
     if (selectedCategory !== 'All Piece') {
@@ -329,19 +316,15 @@ export default function HomeScreen() {
   const gridProducts = useMemo(() => filteredResults.slice(1), [filteredResults]);
 
   const renderGridItem = useCallback(({ item, index }: { item: Product; index: number }) => {
-    const isLiked = likedIds.includes(item.id);
     const isLeft = index % 2 === 0;
     return (
       <View style={{ flex: 1, paddingLeft: isLeft ? 20 : 4, paddingRight: isLeft ? 4 : 20 }}>
         <ProductCard
           product={{ ...item, size: 'small' }}
-          isLiked={isLiked}
-          onPress={() => {}}
-          onPressHeart={() => toggleLike(item.id)}
         />
       </View>
     );
-  }, [likedIds, toggleLike]);
+  }, []);
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
 
@@ -369,15 +352,12 @@ export default function HomeScreen() {
           {firstProduct && (
             <ProductCard
               product={{ ...firstProduct, size: 'large' }}
-              isLiked={likedIds.includes(firstProduct.id)}
-              onPress={() => {}}
-              onPressHeart={() => toggleLike(firstProduct.id)}
             />
           )}
         </View>
       )}
     </>
-  ), [searchQuery, selectedCategory, filteredResults, firstProduct, likedIds, toggleLike, isLoading, page, products.length]);
+  ), [searchQuery, selectedCategory, filteredResults, firstProduct, isLoading, page, products.length]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
