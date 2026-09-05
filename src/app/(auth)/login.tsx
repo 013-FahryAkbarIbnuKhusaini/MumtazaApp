@@ -117,11 +117,8 @@ export default function LoginScreen() {
               rightIcon={<ArrowRight size={18} color="#FFFFFF" />}
             />
 
-            {/* Spacer pushes footer to bottom when content is short */}
-            <View className="flex-1" />
-
             {/* Footer link — route already exists at (auth)/register */}
-            <View className="flex-row justify-center items-center gap-1 mt-8 pb-4">
+            <View className="flex-row justify-center items-center gap-1 mt-6">
               <Text className="text-gray-500 text-sm">{"Don't have an account?"}</Text>
               <Pressable onPress={() => router.push('/(auth)/register')}>
                 <Text className="text-[#785928] font-bold text-sm">Create Account</Text>
