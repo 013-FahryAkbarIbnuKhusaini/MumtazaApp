@@ -25,12 +25,10 @@ export const TextInput = ({
 }: TextInputProps) => {
   return (
     <View className={`w-full ${className}`}>
-      <View className="flex-row items-center bg-[#F5F5F5] rounded-2xl px-4 h-14 w-full">
-        {leftIcon && React.isValidElement(leftIcon)
-          ? React.cloneElement(leftIcon as React.ReactElement<any>, {
-              className: `mr-2 ${(leftIcon.props as any)?.className || ''}`.trim()
-            })
-          : leftIcon}
+      <View className="flex-row items-center bg-stone-100 border border-stone-200 rounded-2xl px-4 h-14 w-full">
+        {leftIcon != null && (
+          <View style={{ marginRight: 10 }}>{leftIcon}</View>
+        )}
         <RNTextInput
           className="flex-1 text-base text-black"
           value={value}
@@ -40,9 +38,11 @@ export const TextInput = ({
           secureTextEntry={secureTextEntry}
           {...props}
         />
-        {rightIcon && <View className="ml-2">{rightIcon}</View>}
+        {rightIcon != null && (
+          <View style={{ marginLeft: 10 }}>{rightIcon}</View>
+        )}
       </View>
-      {error && <Text className="text-red-500 mt-1 text-xs">{error}</Text>}
+      {error ? <Text className="text-red-500 mt-1 text-xs">{error}</Text> : null}
     </View>
   );
 };
