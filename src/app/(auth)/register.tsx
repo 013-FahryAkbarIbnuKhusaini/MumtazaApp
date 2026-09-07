@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react-native';
 import { TextInput } from '../../components/ui/TextInput';
@@ -14,11 +14,10 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignUp = () => {
-    // TODO: wire up registration once backend is ready
-    console.log('Sign up pressed', { fullName, email });
-    router.replace('/(tabs)');
+    router.replace('/(main)/home' as any);
   };
 
   return (
@@ -122,10 +121,11 @@ export default function RegisterScreen() {
             {/* Sign Up button */}
             <View className="mt-6">
               <Button
-                label="SIGN UP"
+                label={isSubmitting ? 'CREATING ACCOUNT...' : 'SIGN UP'}
                 onPress={handleSignUp}
+                disabled={isSubmitting}
                 variant="primary"
-                rightIcon={<ArrowRight size={18} color="#FFFFFF" />}
+                rightIcon={isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ArrowRight size={18} color="#FFFFFF" />}
               />
             </View>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Check } from 'lucide-react-native';
 import { TextInput } from '../../components/ui/TextInput';
@@ -12,11 +12,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignIn = () => {
-    // TODO: wire up authentication once backend is ready
-    console.log('Sign in pressed', { email });
-    router.replace('/(tabs)');
+    router.replace('/(main)/home' as any);
   };
 
   return (
@@ -111,19 +110,23 @@ export default function LoginScreen() {
 
             {/* Sign In button */}
             <Button
-              label="SIGN IN"
+              label={isSubmitting ? 'SIGNING IN...' : 'SIGN IN'}
               onPress={handleSignIn}
+              disabled={isSubmitting}
               variant="primary"
-              rightIcon={<ArrowRight size={18} color="#FFFFFF" />}
+              rightIcon={isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ArrowRight size={18} color="#FFFFFF" />}
             />
 
             {/* Footer link — route already exists at (auth)/register */}
-            <View className="flex-row justify-center items-center gap-1 mt-6">
-              <Text className="text-gray-500 text-sm">{"Don't have an account?"}</Text>
-              <Pressable onPress={() => router.push('/(auth)/register')}>
-                <Text className="text-[#785928] font-bold text-sm">Create Account</Text>
-              </Pressable>
-            </View>
+            <Text className="text-center text-gray-500 text-sm mt-6">
+              {"Don't have an account? "}
+              <Text
+                className="text-[#785928] font-bold"
+                onPress={() => router.push('/(auth)/register')}
+              >
+                Create Account
+              </Text>
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

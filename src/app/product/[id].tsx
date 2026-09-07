@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, ScrollView, Linking } from 'react-native';
+import { View, Text, Pressable, ScrollView, Linking, Modal, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, ShoppingBag } from 'lucide-react-native';
+import Feather from '@expo/vector-icons/Feather';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Product } from '../../types';
+import { useWishlistStore } from '../../store/wishlistStore';
 
 const GOLD_BASE_PRICE_PER_GRAM = 1350000;
 const WHATSAPP_NUMBER = '6281214175087';
@@ -20,6 +22,8 @@ export default function ProductDetailScreen() {
   const { productData } = useLocalSearchParams<{ productData?: string | string[] }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [isCartModalVisible, setIsCartModalVisible] = useState(false);
+  const addToCart = useWishlistStore((s) => s.addToCart);
 
   useEffect(() => {
     const raw = Array.isArray(productData) ? productData[0] : productData;
@@ -147,7 +151,7 @@ export default function ProductDetailScreen() {
       >
         <Pressable
           className="w-12 h-12 rounded-xl border-2 border-[#C9A961] items-center justify-center"
-          onPress={() => console.log('Add to cart: ', product.id)}
+          onPress={() => setIsCartModalVisible(true)}
         >
           <ShoppingBag size={20} color="#C9A961" />
         </Pressable>
@@ -170,6 +174,57 @@ export default function ProductDetailScreen() {
           <Text className="text-white font-bold text-sm">Beli Sekarang</Text>
         </Pressable>
       </View>
+
+      {/* ── Add to Cart confirmation modal ── */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={isCartModalVisible}
+        onRequestClose={() => setIsCartModalVisible(false)}
+      >
+        <Pressable
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onPress={() => setIsCartModalVisible(false)}
+        >
+          <Pressable
+            style={{ backgroundColor: 'white', width: '85%', borderRadius: 24, padding: 24, alignItems: 'center' }}
+            onPress={() => {}}
+          >
+            <View style={{ marginBottom: 16 }}>
+              <Feather name="shopping-bag" size={40} color="#785928" />
+            </View>
+
+            <Text className="w-full font-serif text-xl font-bold text-slate-900 text-center" style={{ marginBottom: 8 }}>
+              Tambah ke Keranjang
+            </Text>
+
+            <Text className="text-center text-stone-500" style={{ marginBottom: 24 }}>
+              Masukkan perhiasan ini ke koleksi keranjang Anda?
+            </Text>
+
+            <View style={{ flexDirection: 'row', width: '100%' }}>
+              <TouchableOpacity
+                style={{ flex: 1, padding: 12, alignItems: 'center' }}
+                onPress={() => setIsCartModalVisible(false)}
+                activeOpacity={0.7}
+              >
+                <Text className="text-stone-500 font-bold">Batal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: '#785928', borderRadius: 12, padding: 12, alignItems: 'center', marginLeft: 12 }}
+                onPress={() => {
+                  addToCart(product);
+                  setIsCartModalVisible(false);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-bold">Ya, Masukkan</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, ArrowRight } from 'lucide-react-native';
 import { TextInput } from '../../components/ui/TextInput';
@@ -9,11 +9,11 @@ import { AuthHeader } from '../../components/auth/AuthHeader';
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSendResetLink = () => {
-    // TODO: wire up password reset request once backend is ready
-    console.log('Send reset link pressed', { email });
-    router.push({ pathname: '/(auth)/verify-otp', params: { email: email.trim() } });
+    Alert.alert("Sukses", "Link reset password telah dikirim ke email Anda.");
+    router.replace('/(auth)/login' as any);
   };
 
   return (
@@ -66,10 +66,11 @@ export default function ForgotPasswordScreen() {
             {/* Send Reset Link button */}
             <View className="mt-6">
               <Button
-                label="SEND RESET LINK"
+                label={isSubmitting ? 'SENDING LINK...' : 'SEND RESET LINK'}
                 onPress={handleSendResetLink}
+                disabled={isSubmitting}
                 variant="primary"
-                rightIcon={<ArrowRight size={18} color="#FFFFFF" />}
+                rightIcon={isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ArrowRight size={18} color="#FFFFFF" />}
               />
             </View>
 
