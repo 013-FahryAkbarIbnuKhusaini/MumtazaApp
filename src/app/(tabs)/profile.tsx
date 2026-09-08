@@ -13,11 +13,10 @@ import Feather from '@expo/vector-icons/Feather';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import SidebarMenu from '../../components/layout/SidebarMenu';
 import { useAuthStore } from '../../store/authStore';
+import { auth } from '../../config/firebase';
 
 // Static local mock constants for user profile
 const USER_DATA = {
-  name: 'Lianel Zaneti Malik Ibrahim',
-  email: 'leonelmesi17@gmail.com',
   membership: 'Silver Member',
 };
 
@@ -117,10 +116,10 @@ export default function ProfileScreen() {
 
           {/* User Name & Email */}
           <Text className="text-xl font-bold text-[#1A1A1A] mb-1 text-center">
-            {USER_DATA.name}
+            {auth.currentUser?.displayName || 'User'}
           </Text>
           <Text className="text-sm text-[#7A756D] mb-3 text-center">
-            {USER_DATA.email}
+            {auth.currentUser?.email || 'No Email'}
           </Text>
 
           {/* Membership Badge */}

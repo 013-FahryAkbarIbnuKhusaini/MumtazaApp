@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Home, Bell, User, X, LogOut } from 'lucide-react-native';
 import { useAuthStore } from '../../store/authStore';
+import { auth } from '../../config/firebase';
 
 const DRAWER_WIDTH = Dimensions.get('window').width * 0.75;
 const BRAND_GOLD = '#C9A961';
@@ -126,8 +127,8 @@ export default function SidebarMenu({ visible, onClose }: SidebarMenuProps) {
                   <User size={28} color="#C9A961" />
                 </View>
               </View>
-              <Text className="text-gray-900 text-lg font-bold">Mumtaza User</Text>
-              <Text className="text-gray-500 text-sm">mumtaza@example.com</Text>
+              <Text className="text-gray-900 text-lg font-bold">{auth.currentUser?.displayName || 'User'}</Text>
+              <Text className="text-gray-500 text-sm">{auth.currentUser?.email || 'No Email'}</Text>
             </View>
 
             <Text className="text-xs text-gray-400 font-semibold tracking-wider px-6 pb-2 pt-6">EKSPLORASI</Text>

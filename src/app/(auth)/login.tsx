@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Check } from 'lucide-react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { TextInput } from '../../components/ui/TextInput';
 import { Button } from '../../components/ui/Button';
 import { AuthHeader } from '../../components/auth/AuthHeader';
@@ -12,10 +14,35 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSignIn = () => {
-    router.replace('/(main)/home' as any);
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      setErrorMsg('Please enter your email and password.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setErrorMsg('');
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace('/(tabs)' as any);
+    } catch (error: any) {
+      let message = "Login failed. Please try again.";
+      if (error.code === 'auth/invalid-credential' || error?.message?.includes('invalid-credential')) {
+        message = "Incorrect email or password.";
+      } else if (error.code === 'auth/invalid-email' || error?.message?.includes('invalid-email')) {
+        message = "Please enter a valid email address.";
+      } else if (error.code === 'auth/network-request-failed' || error?.message?.includes('network')) {
+        message = "Please check your internet connection.";
+      }
+      
+      // WARNING: Use the exact state setter name that exists in this file (e.g., setErrorMsg or setErrorMessage)
+      setErrorMsg(message); 
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,7 +82,10 @@ export default function LoginScreen() {
               <TextInput
                 placeholder="Email Address"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 leftIcon={<Mail size={20} color="#9CA3AF" />}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -68,7 +98,10 @@ export default function LoginScreen() {
               <TextInput
                 placeholder="Password"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 secureTextEntry={!showPassword}
                 leftIcon={<Lock size={20} color="#9CA3AF" />}
                 rightIcon={
@@ -108,13 +141,19 @@ export default function LoginScreen() {
               </Pressable>
             </View>
 
+            {/* Inline Error Message */}
+            {errorMsg ? (
+              <Text className="text-red-500 text-sm mb-4">{errorMsg}</Text>
+            ) : null}
+
             {/* Sign In button */}
             <Button
-              label={isSubmitting ? 'SIGNING IN...' : 'SIGN IN'}
+              label={isLoading ? '' : 'SIGN IN'}
+              loading={isLoading}
               onPress={handleSignIn}
-              disabled={isSubmitting}
+              disabled={isLoading}
               variant="primary"
-              rightIcon={isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ArrowRight size={18} color="#FFFFFF" />}
+              rightIcon={!isLoading ? <ArrowRight size={18} color="#FFFFFF" /> : undefined}
             />
 
             {/* Footer link — route already exists at (auth)/register */}

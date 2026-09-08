@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, ArrowRight } from 'lucide-react-native';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { TextInput } from '../../components/ui/TextInput';
 import { Button } from '../../components/ui/Button';
 import { AuthHeader } from '../../components/auth/AuthHeader';
@@ -11,9 +13,22 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSendResetLink = () => {
-    Alert.alert("Sukses", "Link reset password telah dikirim ke email Anda.");
-    router.replace('/(auth)/login' as any);
+  const handleSendResetLink = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email address.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await sendPasswordResetEmail(auth, email.trim());
+      Alert.alert("Sukses", "Link reset password telah dikirim ke email Anda.");
+      router.replace('/(auth)/login' as any);
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

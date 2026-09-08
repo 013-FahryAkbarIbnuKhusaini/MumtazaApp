@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react-native';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { TextInput } from '../../components/ui/TextInput';
 import { Button } from '../../components/ui/Button';
 import { AuthHeader } from '../../components/auth/AuthHeader';
@@ -14,10 +16,43 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSignUp = () => {
-    router.replace('/(main)/home' as any);
+  const handleSignUp = async () => {
+    if (!email.trim() || !password) {
+      setErrorMsg('Please fill in all fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMsg('Passwords do not match.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setErrorMsg('');
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      if (fullName.trim()) {
+        await updateProfile(userCredential.user, { displayName: fullName.trim() });
+      }
+      router.replace('/(tabs)' as any);
+    } catch (error: any) {
+      let message = "Registration failed. Please try again.";
+      if (error.code === 'auth/email-already-in-use' || error?.message?.includes('email-already-in-use')) {
+        message = "This email is already registered.";
+      } else if (error.code === 'auth/weak-password' || error?.message?.includes('weak-password')) {
+        message = "Password must be at least 6 characters.";
+      } else if (error.code === 'auth/invalid-email' || error?.message?.includes('invalid-email')) {
+        message = "Please enter a valid email address.";
+      }
+      
+      // WARNING: Use the exact state setter name that exists in this file
+      setErrorMsg(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,7 +92,10 @@ export default function RegisterScreen() {
               <TextInput
                 placeholder="Full Name"
                 value={fullName}
-                onChangeText={setFullName}
+                onChangeText={(text) => {
+                  setFullName(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 leftIcon={<User size={20} color="#9CA3AF" />}
                 autoCapitalize="words"
                 textContentType="name"
@@ -68,7 +106,10 @@ export default function RegisterScreen() {
               <TextInput
                 placeholder="Email Address"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 leftIcon={<Mail size={20} color="#9CA3AF" />}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -81,7 +122,10 @@ export default function RegisterScreen() {
               <TextInput
                 placeholder="Password"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 secureTextEntry={!showPassword}
                 leftIcon={<Lock size={20} color="#9CA3AF" />}
                 rightIcon={
@@ -101,7 +145,10 @@ export default function RegisterScreen() {
               <TextInput
                 placeholder="Confirm Password"
                 value={confirmPassword}
-                onChangeText={setConfirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  if (errorMsg) setErrorMsg('');
+                }}
                 secureTextEntry={!showConfirmPassword}
                 leftIcon={<Lock size={20} color="#9CA3AF" />}
                 rightIcon={
@@ -118,14 +165,20 @@ export default function RegisterScreen() {
               />
             </View>
 
+            {/* Inline Error Message */}
+            {errorMsg ? (
+              <Text className="text-red-500 text-sm mt-4">{errorMsg}</Text>
+            ) : null}
+
             {/* Sign Up button */}
             <View className="mt-6">
               <Button
-                label={isSubmitting ? 'CREATING ACCOUNT...' : 'SIGN UP'}
+                label={isLoading ? '' : 'SIGN UP'}
+                loading={isLoading}
                 onPress={handleSignUp}
-                disabled={isSubmitting}
+                disabled={isLoading}
                 variant="primary"
-                rightIcon={isSubmitting ? <ActivityIndicator size="small" color="#FFFFFF" /> : <ArrowRight size={18} color="#FFFFFF" />}
+                rightIcon={!isLoading ? <ArrowRight size={18} color="#FFFFFF" /> : undefined}
               />
             </View>
 
