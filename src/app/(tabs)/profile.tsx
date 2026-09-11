@@ -131,16 +131,16 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Quick Actions (My Orders & Wishlist) */}
+        {/* Quick Actions (Keranjang & Wishlist) */}
         <View className="flex-row gap-x-4 px-5 mb-6">
           <TouchableOpacity
-            onPress={() => router.push('/orders' as any)} // TODO: confirm this route exists — no matching screen found under src/app/ at time of edit
+            onPress={() => router.push('/cart' as any)}
             className="flex-1 bg-white rounded-2xl p-5 items-center justify-center shadow-sm border border-[#F0ECE6]"
           >
             <View className="w-12 h-12 rounded-full bg-[#F4EFEB] items-center justify-center mb-3">
               <Feather name="shopping-bag" size={20} color="#8C6E3D" />
             </View>
-            <Text className="text-sm font-semibold text-[#211D18]">My Orders</Text>
+            <Text className="text-sm font-semibold text-[#211D18]">Keranjang</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
